@@ -4,7 +4,7 @@ export default function ServiceCard({ service }) {
   return (
     <Link
       to={`/services/${service.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-600"
+      className="block rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
     >
       <h2 className="text-lg font-semibold text-gray-900">
         {service.name}

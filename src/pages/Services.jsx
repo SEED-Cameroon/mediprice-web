@@ -26,6 +26,7 @@ const demoServices = [
 
 export default function Services() {
   const [loading, setLoading] = useState(false)
+const [error, setError] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
 
   const search = searchParams.get('search') || ''
@@ -126,6 +127,7 @@ export default function Services() {
     
       
       {/* Results */}
+{/* Results */}
 {loading ? (
   <div
     className="rounded-xl border border-gray-200 p-10 text-center"
@@ -135,6 +137,27 @@ export default function Services() {
     <p className="text-gray-600">
       Loading services...
     </p>
+  </div>
+) : error ? (
+  <div
+    className="rounded-xl border border-red-200 p-10 text-center"
+    role="alert"
+  >
+    <h2 className="text-lg font-semibold text-gray-900">
+      Unable to load services
+    </h2>
+
+    <p className="mt-2 text-gray-600">
+      {error}
+    </p>
+
+    <button
+      type="button"
+      onClick={() => setError('')}
+      className="mt-4 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 hover:bg-gray-50"
+    >
+      Try again
+    </button>
   </div>
 ) : filteredServices.length === 0 ? (
   <div
