@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import ServiceDetail from './pages/ServiceDetail'
+import MedicationDetail from './pages/MedicationDetail'
 import Layout from './components/Layout'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
@@ -7,13 +9,21 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/catalogue" element={<Catalogue />} />
-        </Route>
+        <Route path="/" element={<Home />} />
+        <Route path="/catalogue" element={<Catalogue />} />
+        
+        <Route 
+          path="/medication/:id" 
+          element={<MedicationDetail />} 
+        />
+        
+        <Route
+          path="/service/:id"
+          element={<ServiceDetail />}
+        />
       </Routes>
     </BrowserRouter>
   )
 }
 
-export default App
+export default App;

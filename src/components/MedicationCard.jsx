@@ -1,26 +1,47 @@
-export default function MedicationCard({ medication }) {
+import { Link } from "react-router-dom";
+import TrustBadge from "./TrustBadge";
+
+const MedicationCard = ({ medication }) => {
+  if (!medication) {
+    return (
+      <div className="rounded-lg border p-4">
+        <p>Medication information unavailable.</p>
+      </div>
+    );
+  }
+
   return (
-    <article
-      tabIndex="0"
-      className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-    >
-      <h2 className="font-semibold text-gray-900">
-        {medication.name}
-      </h2>
+    <article className="w-full rounded-lg border bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3">
+        <div>
+          <h2 className="break-words text-lg font-semibold">
+            {medication.name}
+          </h2>
 
-      <p className="mt-2 text-gray-600">
-        {medication.description}
-      </p>
+          {medication.description && (
+            <p className="mt-1 break-words text-sm text-gray-600">
+              {medication.description}
+            </p>
+          )}
+        </div>
 
-      <div className="mt-4">
-        <span className="text-sm font-medium text-gray-700">
-          Trust status:
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-lg font-bold">
+            {medication.price ?? "Price unavailable"}
+          </span>
 
-        <span className="ml-2 inline-block rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-800">
-          {medication.trust}
-        </span>
+          <TrustBadge status={medication.trust} />
+        </div>
+
+        <Link
+          to={`/medication/${medication.id}`}
+          className="block w-full rounded-md bg-blue-600 px-4 py-2 text-center text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        >
+          View details
+        </Link>
       </div>
     </article>
-  )
-}
+  );
+};
+
+export default MedicationCard;
