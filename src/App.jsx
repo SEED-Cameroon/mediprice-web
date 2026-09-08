@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
 import Services from './pages/Services'
+import About from './pages/About'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/services" element={<Services />} />
+          <Route path="/about" element={<About />} />
 
           <Route
             path="/medication/:id"

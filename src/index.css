@@ -1,1 +1,204 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * MediPrice Cameroon design tokens.
+ * Values below map 1:1 onto the reference design's Material-Design-3-style
+ * palette. Each color is defined once on :root/.dark, then exposed both as
+ * a MediPrice-named utility (bg-primary-container, text-on-surface, ...)
+ * and, where shadcn's Button/Input expect it, as the matching shadcn
+ * semantic var (--primary, --background, --border, ...) so shadcn
+ * components render in-brand without extra overrides.
+ */
+@theme inline {
+    --font-sans: "Inter", sans-serif;
+    --font-display: "Hanken Grotesk", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+
+    --text-display-lg: 48px;
+    --text-display-lg--line-height: 56px;
+    --text-headline-lg: 32px;
+    --text-headline-lg--line-height: 40px;
+    --text-title-md: 20px;
+    --text-title-md--line-height: 28px;
+    --text-body-lg: 16px;
+    --text-body-lg--line-height: 24px;
+    --text-body-sm: 14px;
+    --text-body-sm--line-height: 20px;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-on-background: var(--on-background);
+    --color-surface: var(--surface);
+    --color-surface-dim: var(--surface-dim);
+    --color-surface-bright: var(--surface-bright);
+    --color-surface-container-lowest: var(--surface-container-lowest);
+    --color-surface-container-low: var(--surface-container-low);
+    --color-surface-container: var(--surface-container);
+    --color-surface-container-high: var(--surface-container-high);
+    --color-surface-container-highest: var(--surface-container-highest);
+    --color-surface-variant: var(--surface-variant);
+    --color-on-surface: var(--on-surface);
+    --color-on-surface-variant: var(--on-surface-variant);
+    --color-outline: var(--outline);
+    --color-outline-variant: var(--outline-variant);
+    --color-inverse-surface: var(--inverse-surface);
+    --color-inverse-on-surface: var(--inverse-on-surface);
+
+    --color-primary: var(--primary);
+    --color-on-primary: var(--on-primary);
+    --color-primary-container: var(--primary-container);
+    --color-on-primary-container: var(--on-primary-container);
+    --color-primary-fixed: var(--primary-fixed);
+    --color-primary-fixed-dim: var(--primary-fixed-dim);
+    --color-on-primary-fixed: var(--on-primary-fixed);
+    --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
+    --color-inverse-primary: var(--inverse-primary);
+
+    --color-secondary: var(--secondary);
+    --color-on-secondary: var(--on-secondary);
+    --color-secondary-container: var(--secondary-container);
+    --color-on-secondary-container: var(--on-secondary-container);
+    --color-secondary-fixed: var(--secondary-fixed);
+    --color-secondary-fixed-dim: var(--secondary-fixed-dim);
+    --color-on-secondary-fixed: var(--on-secondary-fixed);
+    --color-on-secondary-fixed-variant: var(--on-secondary-fixed-variant);
+
+    --color-tertiary: var(--tertiary);
+    --color-on-tertiary: var(--on-tertiary);
+    --color-tertiary-container: var(--tertiary-container);
+    --color-on-tertiary-container: var(--on-tertiary-container);
+    --color-tertiary-fixed: var(--tertiary-fixed);
+    --color-tertiary-fixed-dim: var(--tertiary-fixed-dim);
+    --color-on-tertiary-fixed: var(--on-tertiary-fixed);
+    --color-on-tertiary-fixed-variant: var(--on-tertiary-fixed-variant);
+
+    --color-error: var(--error);
+    --color-on-error: var(--on-error);
+    --color-error-container: var(--error-container);
+    --color-on-error-container: var(--on-error-container);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --spacing-base: 4px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 48px;
+    --spacing-gutter: 20px;
+    --spacing-container-max: 1280px;
+
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+    --background: #f8f9ff;
+    --foreground: #0b1c30;
+    --on-background: #0b1c30;
+    --surface: #f8f9ff;
+    --surface-dim: #cbdbf5;
+    --surface-bright: #f8f9ff;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #eff4ff;
+    --surface-container: #e5eeff;
+    --surface-container-high: #dce9ff;
+    --surface-container-highest: #d3e4fe;
+    --surface-variant: #d3e4fe;
+    --on-surface: #0b1c30;
+    --on-surface-variant: #3c4a42;
+    --outline: #6c7a71;
+    --outline-variant: #bbcabf;
+    --inverse-surface: #213145;
+    --inverse-on-surface: #eaf1ff;
+
+    --primary: #006c49;
+    --on-primary: #ffffff;
+    --primary-container: #10b981;
+    --on-primary-container: #00422b;
+    --primary-fixed: #6ffbbe;
+    --primary-fixed-dim: #4edea3;
+    --on-primary-fixed: #002113;
+    --on-primary-fixed-variant: #005236;
+    --inverse-primary: #4edea3;
+
+    --secondary: #0058be;
+    --on-secondary: #ffffff;
+    --secondary-container: #2170e4;
+    --on-secondary-container: #fefcff;
+    --secondary-fixed: #d8e2ff;
+    --secondary-fixed-dim: #adc6ff;
+    --on-secondary-fixed: #001a42;
+    --on-secondary-fixed-variant: #004395;
+
+    --tertiary: #855300;
+    --on-tertiary: #ffffff;
+    --tertiary-container: #e29100;
+    --on-tertiary-container: #523200;
+    --tertiary-fixed: #ffddb8;
+    --tertiary-fixed-dim: #ffb95f;
+    --on-tertiary-fixed: #2a1700;
+    --on-tertiary-fixed-variant: #653e00;
+
+    --error: #ba1a1a;
+    --on-error: #ffffff;
+    --error-container: #ffdad6;
+    --on-error-container: #93000a;
+
+    /* shadcn semantic aliases */
+    --card: var(--surface-container-lowest);
+    --card-foreground: var(--on-surface);
+    --popover: var(--surface-container-lowest);
+    --popover-foreground: var(--on-surface);
+    --primary-foreground: var(--on-primary);
+    --secondary-foreground: var(--on-secondary);
+    --muted: var(--surface-container-low);
+    --muted-foreground: var(--on-surface-variant);
+    --accent: var(--surface-container-high);
+    --accent-foreground: var(--on-surface);
+    --destructive: var(--error);
+    --border: var(--outline-variant);
+    --input: var(--outline-variant);
+    --ring: var(--primary);
+    --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-on-surface;
+    }
+  html {
+    @apply font-sans;
+    }
+}
+
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.hero-gradient {
+    background: linear-gradient(rgba(0, 42, 27, 0.7), rgba(0, 42, 27, 0.85));
+}
