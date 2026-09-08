@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import ComparisonTable from "../components/ComparisonTable";
 import TrustBadge from "../components/TrustBadge";
-import medications from "../data/medications";
+import medications from "../data/Medications";
 
 const MedicationDetail = () => {
   const { id } = useParams();

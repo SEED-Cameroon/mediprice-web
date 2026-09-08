@@ -1,5 +1,5 @@
 import MedicationCard from "../components/MedicationCard";
-import medications from "../data/medications";
+import medications from "../data/Medications";
 
 const Catalogue = () => {
   return (
