@@ -4,7 +4,7 @@ const navLinks = [
   { label: "Compare Prices", to: "/catalogue" },
   { label: "How it Works", to: "/#how-it-works" },
   { label: "Providers", to: "#" },
-  { label: "About Us", to: "#" },
+  { label: "About Us", to: "/about" },
 ];
 
 const footerLinks = {

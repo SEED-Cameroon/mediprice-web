@@ -18,6 +18,17 @@
     --font-display: "Hanken Grotesk", sans-serif;
     --font-mono: "JetBrains Mono", monospace;
 
+    --text-display-lg: 48px;
+    --text-display-lg--line-height: 56px;
+    --text-headline-lg: 32px;
+    --text-headline-lg--line-height: 40px;
+    --text-title-md: 20px;
+    --text-title-md--line-height: 28px;
+    --text-body-lg: 16px;
+    --text-body-lg--line-height: 24px;
+    --text-body-sm: 14px;
+    --text-body-sm--line-height: 20px;
+
     --color-background: var(--background);
     --color-foreground: var(--foreground);
     --color-on-background: var(--on-background);
