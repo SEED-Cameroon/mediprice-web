@@ -1,55 +1,63 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Search, Scale, ShieldCheck, CheckCircle2, Shield, Users } from "lucide-react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import medications from "@/data/Medications";
 
-const popularSearches = ["Paracetamol", "Malaria test", "Coartem"];
+const featured = medications[0]; // Paracetamol 500mg — the board's example entry
+const otherSearches = medications.slice(1).map((m) => m.name.split(" ")[0]);
 
-const howItWorks = [
+const steps = [
   {
-    icon: Search,
+    number: "01",
     title: "Search",
     description:
-      "Find any medication or service in seconds using our comprehensive database of local providers.",
+      "Look up a medication, lab test, or service by name. No account needed.",
   },
   {
-    icon: Scale,
+    number: "02",
     title: "Compare",
     description:
-      "See real-time prices from providers across Bamenda and find the most affordable care options nearby.",
+      "See what pharmacies and hospitals near you are actually charging for it.",
   },
   {
-    icon: ShieldCheck,
-    title: "Trust",
+    number: "03",
+    title: "Check the stamp",
     description:
-      "Check the badge to know who verified the price and when it was last updated for total peace of mind.",
+      "Every price is marked with who confirmed it and when, so you know how far to trust it.",
   },
 ];
 
-const verificationLegend = [
+const stamps = [
   {
-    icon: CheckCircle2,
-    title: "SEED Verified",
-    highlight: "SEED Team",
+    label: "SEED verified",
+    rotate: "-rotate-3",
+    color: "forest",
     description:
-      "personally verified on-site or via direct audit. This is the highest level of trust.",
+      "Confirmed on-site by the SEED team. The highest level of trust on the board.",
   },
   {
-    icon: Shield,
-    title: "Provider Verified",
-    highlight: "pharmacy or hospital",
+    label: "Provider verified",
+    rotate: "rotate-2",
+    color: "stamp",
     description:
-      "management directly confirmed and updated this price through their official portal.",
+      "Confirmed directly by the pharmacy or hospital through their own listing.",
   },
   {
-    icon: Users,
-    title: "Community Reported",
-    highlight: "User-submitted",
+    label: "Community reported",
+    rotate: "-rotate-2",
+    color: "clay",
     description:
-      "data from recent patient receipts. Unverified, but useful real-world context.",
+      "Submitted by a patient from a recent receipt. Useful, but not yet confirmed.",
   },
 ];
+
+const stampColorClasses = {
+  forest: "border-forest text-forest",
+  stamp: "border-stamp text-stamp",
+  clay: "border-clay text-clay",
+};
 
 const Home = () => {
   const navigate = useNavigate();
@@ -66,7 +74,9 @@ const Home = () => {
 
   const goToCatalogue = (term) => {
     const search = term.trim();
-    navigate(search ? `/catalogue?search=${encodeURIComponent(search)}` : "/catalogue");
+    navigate(
+      search ? `/catalogue?search=${encodeURIComponent(search)}` : "/catalogue",
+    );
   };
 
   const handleSearchSubmit = (event) => {
@@ -83,98 +93,164 @@ const Home = () => {
 
   return (
     <main className="flex flex-col">
-      {/* Hero */}
-      <section className="hero-gradient relative flex min-h-[600px] items-center justify-center overflow-hidden bg-on-primary-container">
-        <div className="relative z-10 flex w-full max-w-container-max flex-col items-center px-gutter py-xl text-center">
-          <h1 className="mb-4 max-w-3xl font-display text-4xl font-black text-white sm:text-5xl">
-            Find the best prices for health in Bamenda.
-          </h1>
+      {/* Hero: the board's cover, with today's example entry open on it */}
+      <section className="bg-forest-deep">
+        <div className="mx-auto grid w-full max-w-container-max gap-xl px-gutter py-xl lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-16">
+          <div>
+            <p className="font-display text-lg italic text-paper/70">
+              A community price ledger for Bamenda
+            </p>
 
-          <p className="mb-10 max-w-2xl text-lg text-white/90">
-            Compare medication, lab tests, and care services across local
-            pharmacies and hospitals in real-time.
-          </p>
+            <h1 className="mt-3 max-w-144 font-display text-4xl font-semibold leading-[1.1] text-paper sm:text-5xl">
+              {featured.name} costs {featured.providers[0].price} here,{" "}
+              {featured.providers[1].price} there.
+            </h1>
 
-          <form
-            onSubmit={handleSearchSubmit}
-            className="flex w-full max-w-3xl flex-col gap-2 rounded-xl border border-white/20 bg-surface-container-lowest p-2 shadow-2xl sm:flex-row sm:items-center"
-          >
-            <div className="flex flex-1 items-center gap-2">
-              <Search
-                className="ml-2 size-5 shrink-0 text-outline"
-                aria-hidden="true"
-              />
+            <p className="mt-5 max-w-112 text-base leading-7 text-paper/75">
+              SEED Cameroon and the people of Bamenda keep this board
+              up to date, so you know the price before you walk in — for
+              medication, lab tests, and hospital services alike.
+            </p>
 
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search a drug, lab test, or service…"
-                aria-label="Search a drug, lab test, or service"
-                className="h-auto flex-1 border-none bg-transparent py-3 text-base text-on-surface shadow-none focus-visible:ring-0"
-              />
+            <form
+              onSubmit={handleSearchSubmit}
+              className="mt-8 flex flex-col gap-2 sm:flex-row"
+            >
+              <div className="flex flex-1 items-center gap-2 rounded-sm border border-paper/25 bg-forest-deep px-3 py-2.5 focus-within:border-paper/60">
+                <Search
+                  className="size-4 shrink-0 text-paper/50"
+                  aria-hidden="true"
+                />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Look up a drug, test, or service"
+                  aria-label="Look up a drug, test, or service"
+                  className="h-auto flex-1 border-none bg-transparent p-0 text-base text-paper shadow-none placeholder:text-paper/50 focus-visible:ring-0"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="rounded-sm bg-paper px-6 py-5 text-forest-deep hover:bg-paper/90"
+              >
+                Search the board
+              </Button>
+            </form>
+
+            <p className="mt-4 text-sm text-paper/60">
+              Also on the board:{" "}
+              {otherSearches.map((term, i) => (
+                <span key={term}>
+                  <button
+                    type="button"
+                    onClick={() => goToCatalogue(term)}
+                    className="rounded-xs text-paper underline decoration-paper/40 underline-offset-4 hover:decoration-paper focus:outline-none focus-visible:ring-2 focus-visible:ring-paper focus-visible:ring-offset-2 focus-visible:ring-offset-forest-deep"
+                  >
+                    {term}
+                  </button>
+                  {i < otherSearches.length - 1 ? ", " : "."}
+                </span>
+              ))}
+            </p>
+          </div>
+
+          {/* The ledger entry itself */}
+          <div className="rounded-sm bg-paper-raised p-6 shadow-[0_24px_60px_-24px_rgba(0,0,0,0.5)] sm:p-8">
+            <div className="flex items-baseline justify-between gap-4 border-b border-line pb-4">
+              <div>
+                <p className="text-xs text-ink-soft">{featured.category}</p>
+                <h2 className="font-display text-2xl font-semibold text-ink">
+                  {featured.name}
+                </h2>
+              </div>
+              <p className="whitespace-nowrap text-xs text-ink-soft">
+                Checked today in Bamenda
+              </p>
             </div>
 
-            <Button
-              type="submit"
-              size="lg"
-              className="w-full rounded-lg px-8 py-6 sm:w-auto"
-            >
-              Search
-            </Button>
-          </form>
+            <ul>
+              {featured.providers.map((provider, index) => (
+                <li
+                  key={provider.id}
+                  className="ledger-row flex items-center justify-between gap-4 border-b border-line py-4 last:border-b-0"
+                  style={{ "--row-index": index }}
+                >
+                  <div>
+                    <p className="font-medium text-ink">{provider.name}</p>
+                    <p className="text-xs text-ink-soft">
+                      {provider.trust}, updated {provider.updatedAt.toLowerCase()}
+                    </p>
+                  </div>
+                  <p className="font-mono text-lg font-medium tabular-nums text-ink">
+                    {provider.price}
+                  </p>
+                </li>
+              ))}
+            </ul>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-            <span className="text-sm font-medium uppercase tracking-wider text-white/70">
-              Popular:
-            </span>
-
-            {popularSearches.map((term) => (
-              <button
-                key={term}
-                type="button"
-                onClick={() => goToCatalogue(term)}
-                className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white backdrop-blur-md transition-colors hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-on-primary-container"
-              >
-                {term}
-              </button>
-            ))}
+            <p className="mt-4 text-xs leading-relaxed text-ink-soft">
+              {featured.description}
+            </p>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
-      <section
-        id="how-it-works"
-        className="scroll-mt-20 bg-surface-container-low py-xl"
-      >
+      {/* How the board works — a real 3-step sequence */}
+      <section id="how-it-works" className="scroll-mt-20 bg-paper py-xl">
         <div className="mx-auto max-w-container-max px-gutter">
-          <div className="mb-xl flex flex-col items-center text-center">
-            <h2 className="mb-4 font-display text-3xl font-bold text-on-surface">
-              How it works: Trust the Badge
-            </h2>
+          <h2 className="max-w-112 font-display text-3xl font-semibold text-ink">
+            How the board works
+          </h2>
 
-            <p className="max-w-2xl text-lg text-on-surface-variant">
-              We bridge the gap between providers and patients with verified,
-              transparent pricing data you can count on.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-lg md:grid-cols-3">
-            {howItWorks.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="group rounded-xl border border-outline-variant bg-surface-container-lowest p-lg transition-all hover:border-primary"
+          <ol className="mt-xl divide-y divide-line border-y border-line">
+            {steps.map((step) => (
+              <li
+                key={step.number}
+                className="flex flex-col gap-2 py-lg sm:flex-row sm:items-baseline sm:gap-8"
               >
-                <div className="mb-md flex size-14 items-center justify-center rounded-full bg-primary-container text-on-primary-container transition-transform group-hover:scale-110">
-                  <Icon className="size-7" aria-hidden="true" />
+                <span className="font-display text-3xl font-medium text-ink-soft sm:w-16 sm:shrink-0">
+                  {step.number}
+                </span>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-ink">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 max-w-144 text-sm leading-relaxed text-ink-soft">
+                    {step.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Verification stamps */}
+      <section className="bg-paper-recessed py-xl">
+        <div className="mx-auto max-w-container-max px-gutter">
+          <h2 className="max-w-112 font-display text-3xl font-semibold text-ink">
+            Three kinds of stamp
+          </h2>
+          <p className="mt-3 max-w-144 text-base leading-relaxed text-ink-soft">
+            Every price on the board carries one of these. Look for it before
+            you decide how much to trust a number.
+          </p>
+
+          <div className="mt-xl grid grid-cols-1 gap-lg md:grid-cols-3">
+            {stamps.map((stamp) => (
+              <div key={stamp.label} className="flex flex-col items-start">
+                <div
+                  className={`flex size-24 shrink-0 items-center justify-center rounded-full border-2 border-double p-2 text-center ${stampColorClasses[stamp.color]} ${stamp.rotate}`}
+                >
+                  <span className="text-[0.65rem] font-semibold uppercase leading-tight tracking-wide">
+                    {stamp.label}
+                  </span>
                 </div>
 
-                <h3 className="mb-2 text-lg font-semibold text-on-surface">
-                  {title}
-                </h3>
-
-                <p className="text-sm text-on-surface-variant">
-                  {description}
+                <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+                  {stamp.description}
                 </p>
               </div>
             ))}
@@ -182,84 +258,53 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Verification legend */}
-      <section className="bg-surface-container-lowest py-xl">
+      {/* Newsletter — a tear-off slip */}
+      <section className="bg-paper py-xl">
         <div className="mx-auto max-w-container-max px-gutter">
-          <div className="rounded-2xl border border-outline-variant bg-surface-bright p-lg md:p-xl">
-            <h2 className="mb-xl border-b border-outline-variant pb-4 font-display text-xl font-bold text-on-surface">
-              Verification Legend
-            </h2>
-
-            <div className="grid grid-cols-1 gap-xl lg:grid-cols-3">
-              {verificationLegend.map(
-                ({ icon: Icon, title, highlight, description }) => (
-                  <div key={title} className="flex items-start gap-md">
-                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-6" aria-hidden="true" />
-                    </div>
-
-                    <div>
-                      <h4 className="mb-1 text-base font-bold text-on-surface">
-                        {title}
-                      </h4>
-
-                      <p className="text-sm leading-relaxed text-on-surface-variant">
-                        This price has been{" "}
-                        <span className="font-bold text-primary">
-                          {highlight}
-                        </span>{" "}
-                        {description}
-                      </p>
-                    </div>
-                  </div>
-                ),
-              )}
+          <div
+            className="flex flex-col gap-lg border-t-2 border-dashed border-line pt-lg sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="max-w-112">
+              <h3 className="font-display text-xl font-semibold text-ink">
+                Get the monthly price report
+              </h3>
+              <p className="mt-1 text-sm text-ink-soft">
+                One email a month with what's changed on the board for
+                Bamenda. Nothing else.
+              </p>
             </div>
+
+            {subscribed ? (
+              <p
+                role="status"
+                className="w-full max-w-88 rounded-sm border border-forest bg-paper-raised px-4 py-3 text-sm font-medium text-forest"
+              >
+                Added to the list — thanks for joining.
+              </p>
+            ) : (
+              <form
+                onSubmit={handleSubscribe}
+                className="flex w-full max-w-88 gap-2"
+              >
+                <Input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="you@example.com"
+                  aria-label="Email address"
+                  className="h-auto flex-1 rounded-sm border-line bg-paper-raised px-3 py-2.5 text-sm"
+                />
+
+                <Button
+                  type="submit"
+                  className="rounded-sm bg-forest px-5 py-2.5 hover:bg-forest-deep"
+                >
+                  Join
+                </Button>
+              </form>
+            )}
           </div>
-        </div>
-      </section>
-
-      {/* Newsletter / CTA */}
-      <section className="border-y border-primary/10 bg-primary-container/20 py-xl">
-        <div className="mx-auto flex max-w-container-max flex-col items-center justify-between gap-lg px-gutter md:flex-row">
-          <div className="max-w-[36rem] text-center md:text-left">
-            <h3 className="mb-2 font-display text-xl font-bold text-on-primary-container">
-              Want to save more on healthcare?
-            </h3>
-
-            <p className="text-sm text-on-surface-variant">
-              Sign up for our monthly health transparency report for Bamenda.
-              No spam, just savings.
-            </p>
-          </div>
-
-          {subscribed ? (
-            <p
-              role="status"
-              className="w-full max-w-[24rem] rounded-lg border border-primary bg-surface-container-lowest px-4 py-3 text-center text-sm font-medium text-primary"
-            >
-              You're on the list — thanks for joining!
-            </p>
-          ) : (
-            <form
-              onSubmit={handleSubscribe}
-              className="flex w-full max-w-[24rem] gap-2"
-            >
-              <Input
-                type="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter your email"
-                aria-label="Email address"
-                className="h-auto flex-1 rounded-lg border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm"
-              />
-
-              <Button type="submit" className="rounded-lg px-6 py-2.5">
-                Join
-              </Button>
-            </form>
-          )}
         </div>
       </section>
     </main>
