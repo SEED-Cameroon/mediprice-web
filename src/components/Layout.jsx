@@ -55,7 +55,7 @@ const Layout = () => {
             <Link
               key={link.label}
               to={link.to}
-              className="rounded-sm text-sm font-medium text-on-surface transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="rounded-sm px-1 py-2 text-sm font-medium text-on-surface transition-colors hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               {link.label}
             </Link>
@@ -102,12 +102,12 @@ const Layout = () => {
                   {heading}
                 </h5>
 
-                <ul className="flex flex-col gap-sm text-sm text-surface-dim">
+                <ul className="flex flex-col text-sm text-surface-dim">
                   {links.map((link) => (
                     <li key={link.label}>
                       <Link
                         to={link.to}
-                        className="rounded-sm transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed focus-visible:ring-offset-2 focus-visible:ring-offset-on-surface"
+                        className="inline-block rounded-sm py-1.5 transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed focus-visible:ring-offset-2 focus-visible:ring-offset-on-surface"
                       >
                         {link.label}
                       </Link>

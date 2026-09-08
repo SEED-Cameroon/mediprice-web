@@ -108,7 +108,7 @@ const Home = () => {
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search a drug, lab test, or service…"
+                placeholder="Search a drug or service…"
                 aria-label="Search a drug, lab test, or service"
                 className="h-auto flex-1 border-none bg-transparent py-3 text-base text-on-surface shadow-none focus-visible:ring-0"
               />
@@ -221,7 +221,7 @@ const Home = () => {
 
       {/* Newsletter / CTA */}
       <section className="border-y border-primary/10 bg-primary-container/20 py-xl">
-        <div className="mx-auto flex max-w-container-max flex-col items-center justify-between gap-lg px-gutter md:flex-row">
+        <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-lg px-gutter md:flex-row">
           <div className="max-w-[36rem] text-center md:text-left">
             <h3 className="mb-2 font-display text-xl font-bold text-on-primary-container">
               Want to save more on healthcare?
