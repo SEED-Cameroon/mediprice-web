@@ -29,6 +29,13 @@ const Layout = () => {
             >
               Catalogue
             </Link>
+
+            <Link
+              to="/services"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Services
+            </Link>
           </div>
         </nav>
       </header>
