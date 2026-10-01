@@ -163,7 +163,7 @@ const About = () => {
 
       <div className="mt-12">
         <Link
-          to="/catalogue"
+          to="/medications"
           className="inline-flex h-12 items-center rounded-lg bg-primary px-6 text-base font-semibold text-on-primary hover:bg-on-primary-fixed-variant focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         >
           Compare medication prices

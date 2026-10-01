@@ -1,24 +1,29 @@
 import { useParams } from "react-router-dom";
-import ItemDetail from "../components/ItemDetail";
-import catalog from "../data/catalog";
+import ItemDetail, { ItemDetailError, ItemDetailSkeleton } from "../components/ItemDetail";
 import NotFound from "./NotFound";
+import useApiFetch from "@/hooks/useApiFetch";
+import { getService } from "@/services/catalog";
 
 const ServiceDetail = () => {
   const { id } = useParams();
-  const service = catalog.find((item) => item.key === `service-${id}`);
+  const { data, status, error, reload } = useApiFetch(() => getService(id), [id]);
 
-  if (!service) {
-    return (
+  if (status === "loading") return <ItemDetailSkeleton />;
+
+  if (status === "error") {
+    return error.status === 404 ? (
       <NotFound
-        title="We couldn't find that service"
+        title="We couldn't find that test or service"
         message="It may have been removed, or the link may be wrong. Search lab tests and services instead."
-        linkTo="/services"
+        linkTo="/labs-services"
         linkLabel="Browse lab tests and services"
       />
+    ) : (
+      <ItemDetailError message={error.message} onRetry={reload} />
     );
   }
 
-  return <ItemDetail key={service.key} item={service} backTo="/services" backLabel="All lab tests and services" />;
+  return <ItemDetail key={data.key} item={data} backTo="/labs-services" backLabel="All lab tests and services" />;
 };
 
 export default ServiceDetail;

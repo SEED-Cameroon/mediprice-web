@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Info } from "lucide-react";
 import { priceSummary } from "@/lib/format";
 import FilterGroup from "./FilterGroup";
 import PriceListRow from "./PriceListRow";
@@ -28,7 +29,7 @@ const sorters = {
  * @param {string} props.intro
  * @param {string} props.searchLabel
  * @param {string} props.searchPlaceholder
- * @param {object[]} props.items - catalogue items (see src/data/catalog.js)
+ * @param {object[]} props.items - items from src/services/catalog.js
  * @param {{ param: string, label: string, getValue: (item: object) => string }[]} props.filters
  * @param {string} props.noun - plural noun for the result count, e.g. "medications"
  * @param {boolean} [props.showKind] - show the item type in each row
@@ -54,6 +55,8 @@ const BrowsePage = ({
   onRetry,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
+  // Other pages can send people here with a message, e.g. Compare with too few items.
+  const notice = useLocation().state?.notice;
 
   const search = searchParams.get("search") ?? "";
   const sort = sorters[searchParams.get("sort")] ? searchParams.get("sort") : "price";
@@ -134,6 +137,15 @@ const BrowsePage = ({
       </header>
 
     <div className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
+      {notice && (
+        <p
+          role="status"
+          className="mt-6 flex gap-3 rounded-2xl bg-secondary/10 px-5 py-4 text-lg text-on-surface ring-1 ring-secondary/30"
+        >
+          <Info className="mt-1 size-5 shrink-0 text-secondary" aria-hidden="true" />
+          {notice}
+        </p>
+      )}
       <div className="mt-8 grid gap-8 lg:grid-cols-[15rem_1fr] lg:gap-10">
         {filters.length > 0 && (
           <aside aria-label="Filters" className="min-w-0 space-y-5 lg:sticky lg:top-24 lg:self-start">

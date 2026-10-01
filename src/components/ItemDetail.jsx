@@ -13,7 +13,9 @@ import {
 } from "lucide-react";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { daysSince, directionsUrl, trustRank, typicalPrice } from "@/lib/pricing";
-import catalog from "../data/catalog";
+import useApiFetch from "@/hooks/useApiFetch";
+import { listMedications, listServices } from "@/services/catalog";
+import CompareButton from "./CompareButton";
 import Freshness from "./Freshness";
 import PriceListRow from "./PriceListRow";
 import PriceSpread from "./PriceSpread";
@@ -61,10 +63,12 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
     .sort(sorters[sort]);
 
   // Same category first, then others of the same group (medications vs services).
-  const isMedication = item.kind === "Medication";
-  const sameGroup = catalog.filter(
-    (other) => other.key !== item.key && (other.kind === "Medication") === isMedication,
+  const isMedication = item.group === "medication";
+  const { data: groupItems = [] } = useApiFetch(
+    () => (isMedication ? listMedications() : listServices()),
+    [isMedication],
   );
+  const sameGroup = groupItems.filter((other) => other.key !== item.key);
   const related = [
     ...sameGroup.filter((other) => other.category === item.category),
     ...sameGroup.filter((other) => other.category !== item.category),
@@ -140,7 +144,14 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
                 {formatFCFA(lowest)}
               </p>
 
-              <p className="mt-3 text-xl font-bold text-on-surface">{cheapest.name}</p>
+              <p className="mt-3 text-xl font-bold text-on-surface">
+                <Link
+                  to={`/providers/${cheapest.providerId}`}
+                  className="underline-offset-4 hover:text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  {cheapest.name}
+                </Link>
+              </p>
               <p className="mt-1 flex items-center gap-1.5 text-base text-on-surface-variant">
                 <MapPin className="size-5 shrink-0" aria-hidden="true" />
                 {[cheapest.type, cheapest.area].filter(Boolean).join(", ")}
@@ -183,6 +194,7 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
                   Get directions
                   <span className="sr-only"> to {cheapest.name} (opens Google Maps)</span>
                 </a>
+                <CompareButton item={item} />
                 {count > 1 && (
                   <a
                     href="#all-prices"
@@ -293,5 +305,36 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
     </div>
   );
 };
+
+/** Placeholder shown while an item loads. */
+export const ItemDetailSkeleton = () => (
+  <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6" aria-busy="true" aria-label="Loading prices">
+    <div className="flex gap-4">
+      <div className="size-16 animate-pulse rounded-2xl bg-surface-container" />
+      <div className="flex-1 space-y-3">
+        <div className="h-5 w-40 animate-pulse rounded bg-surface-container" />
+        <div className="h-9 w-2/3 animate-pulse rounded-lg bg-surface-container" />
+      </div>
+    </div>
+    <div className="mt-10 h-72 max-w-3xl animate-pulse rounded-3xl bg-surface-container" />
+  </div>
+);
+
+/** Shown when an item fails to load for a reason other than "not found". */
+export const ItemDetailError = ({ message, onRetry }) => (
+  <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+    <div className="max-w-3xl rounded-2xl bg-error-container p-6" role="alert">
+      <p className="text-lg font-semibold text-on-error-container">Prices couldn't be loaded</p>
+      <p className="mt-1 text-base text-on-error-container">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="mt-4 h-12 rounded-xl bg-primary px-6 text-lg font-semibold text-on-primary hover:bg-on-primary-fixed-variant focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/40"
+      >
+        Try again
+      </button>
+    </div>
+  </div>
+);
 
 export default ItemDetail;

@@ -19,6 +19,16 @@ cp .env.example .env   # then fill in real values (ask a lead)
 npm run dev
 ```
 
+## Sample data vs the live API
+
+With no `VITE_API_URL` set, the app runs entirely on sample data from `src/data/`, so every page works without a backend. To use the real API, add this to your `.env`:
+
+```bash
+VITE_API_URL=http://localhost:5000/api   # the mediprice-api base URL
+```
+
+All data goes through `src/services/catalog.js`, the only file that calls `apiFetch`. Pages load it with the `useApiFetch` hook, which handles loading and error states. If the backend's field names differ from what the app expects, adjust the `normalise*` functions at the top of `src/services/catalog.js`; no page needs to change.
+
 ## Branch & PR rules
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before your first commit. Short version: never push to `main`, branch per feature, small PRs, one review required.

@@ -4,40 +4,55 @@ import { ArrowRight, Building2, FlaskConical, Hospital, Pill, Search } from "luc
 import FairPriceTag from "../components/FairPriceTag";
 import Freshness from "../components/Freshness";
 import PriceListRow from "../components/PriceListRow";
-import TrustBadge, { trustLevels } from "../components/TrustBadge";
-import catalog, { providers } from "../data/catalog";
+import TrustBadge from "../components/TrustBadge";
+import { trustLevels } from "@/lib/trust";
+import useApiFetch from "@/hooks/useApiFetch";
+import { listAll, providersFrom } from "@/services/catalog";
 import images from "../data/images";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { comparePrice, typicalPrice } from "@/lib/pricing";
 
 const popularSearches = ["Paracetamol", "Coartem", "Malaria test", "Ultrasound", "Blood count"];
 
-// The price board: a mix of the most common medicines and services.
-const boardKeys = ["medication-4", "medication-1", "service-1", "medication-2", "service-3"];
-const board = boardKeys.map((key) => catalog.find((item) => item.key === key)).filter(Boolean);
+const categoryDefs = [
+  { title: "Medicines", kind: "Medication", to: "/medications", noun: "medicines" },
+  { title: "Lab tests", kind: "Lab test", to: "/labs-services?type=Lab+test", noun: "tests" },
+  { title: "Care services", kind: "Care service", to: "/labs-services?type=Care+service", noun: "services" },
+];
 
+/** Everything the home page shows, derived from the full item list. */
+function buildHome(catalog) {
+  // Items with the most prices are the most useful to feature.
+  const byCoverage = [...catalog].sort((a, b) => b.providers.length - a.providers.length);
+  const heroItem = byCoverage[0];
+  const heroSummary = priceSummary(heroItem?.providers ?? []);
 
-// The worked example in "How to read a price".
-const exampleItem = catalog.find((item) => item.key === "medication-4");
-const exampleProvider = exampleItem.providers.find((provider) => provider.trust === "Provider-verified");
-const exampleTypical = typicalPrice(exampleItem.providers);
-const exampleFair = comparePrice(exampleProvider.price, exampleTypical);
+  const exampleItem = heroItem;
+  const exampleProvider =
+    exampleItem?.providers.find((provider) => provider.price !== heroSummary.lowest) ?? exampleItem?.providers[0];
+  const exampleTypical = typicalPrice(exampleItem?.providers ?? []);
 
-// The floating card on the hero photo shows a real comparison.
-const heroItem = exampleItem;
-const heroSummary = priceSummary(heroItem.providers);
-const heroCheapest = heroItem.providers.find((provider) => provider.price === heroSummary.lowest);
-const heroTypical = typicalPrice(heroItem.providers);
+  const lowestOf = (items) => Math.min(...items.map((item) => priceSummary(item.providers).lowest ?? Infinity));
 
-const lowestOf = (items) => Math.min(...items.map((item) => priceSummary(item.providers).lowest));
-const categories = [
-  { title: "Medications", kind: "Medication", to: "/catalogue", noun: "medicines" },
-  { title: "Lab tests", kind: "Lab test", to: "/services?type=Lab+test", noun: "tests" },
-  { title: "Care services", kind: "Care service", to: "/services?type=Care+service", noun: "services" },
-].map((category) => {
-  const items = catalog.filter((item) => item.kind === category.kind);
-  return { ...category, count: items.length, from: lowestOf(items), image: images[category.kind] };
-});
+  return {
+    catalog,
+    board: byCoverage.slice(0, 5),
+    heroItem,
+    heroSummary,
+    heroCheapest: heroItem?.providers.find((provider) => provider.price === heroSummary.lowest),
+    heroTypical: typicalPrice(heroItem?.providers ?? []),
+    exampleItem,
+    exampleProvider,
+    exampleFair: exampleProvider ? comparePrice(exampleProvider.price, exampleTypical) : null,
+    providers: providersFrom(catalog),
+    categories: categoryDefs
+      .map((category) => {
+        const items = catalog.filter((item) => item.kind === category.kind);
+        return { ...category, count: items.length, from: lowestOf(items), image: images[category.kind] };
+      })
+      .filter((category) => category.count > 0),
+  };
+}
 
 const providerIcons = {
   Pharmacy: Pill,
@@ -47,12 +62,56 @@ const providerIcons = {
   Laboratory: FlaskConical,
 };
 
+/** Loading, empty and error states for the parts of the home page that need prices. */
+const HomeDataState = ({ status, error, onRetry }) => (
+  <section className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6">
+    {status === "loading" ? (
+      <div aria-busy="true" aria-label="Loading prices" className="grid gap-5 sm:grid-cols-3">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="h-64 animate-pulse rounded-2xl bg-surface-container" />
+        ))}
+      </div>
+    ) : status === "error" ? (
+      <div className="rounded-2xl bg-error-container p-6" role="alert">
+        <p className="text-lg font-semibold text-on-error-container">Prices couldn't be loaded</p>
+        <p className="mt-1 text-base text-on-error-container">{error?.message}</p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="mt-4 h-12 rounded-xl bg-primary px-6 text-lg font-semibold text-on-primary hover:bg-on-primary-fixed-variant"
+        >
+          Try again
+        </button>
+      </div>
+    ) : (
+      <p className="rounded-2xl bg-surface-container px-5 py-4 text-lg text-on-surface">
+        No prices have been added yet. Check back soon.
+      </p>
+    )}
+  </section>
+);
+
 const Home = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const { data, status, error, reload } = useApiFetch(() => listAll(), []);
+  const view = data && data.length > 0 ? buildHome(data) : null;
+  const {
+    catalog = [],
+    board = [],
+    heroItem,
+    heroSummary,
+    heroCheapest,
+    heroTypical,
+    exampleItem,
+    exampleProvider,
+    exampleFair,
+    providers = [],
+    categories = [],
+  } = view ?? {};
 
   useEffect(() => {
     if (!location.hash) return;
@@ -146,26 +205,32 @@ const Home = () => {
           </div>
 
           {/* A real comparison, so the first thing people see is a price */}
-          <Link
-            to={heroItem.href}
-            className="block self-end rounded-2xl bg-white p-5 text-on-surface shadow-2xl shadow-black/30 transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-fixed-dim lg:ml-auto lg:w-[22rem]"
-          >
-            <p className="text-sm font-medium text-on-surface-variant">Today's lowest price for</p>
-            <p className="mt-0.5 text-lg font-bold leading-snug">Malaria treatment (adult)</p>
-            <p className="tabular mt-3 text-3xl font-extrabold tracking-tight">{formatFCFA(heroSummary.lowest)}</p>
-            <p className="mt-0.5 text-base text-on-surface-variant">at {heroCheapest.name}</p>
-            <div className="mt-3">
-              <TrustBadge status={heroCheapest.trust} />
-            </div>
-            {heroTypical !== null && (
-              <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-base font-semibold text-primary">
-                Save {formatFCFA(heroTypical - heroSummary.lowest)} on the usual price
-              </p>
-            )}
-          </Link>
+          {heroCheapest && (
+            <Link
+              to={heroItem.href}
+              className="block self-end rounded-2xl bg-white p-5 text-on-surface shadow-2xl shadow-black/30 transition-transform hover:-translate-y-0.5 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-fixed-dim lg:ml-auto lg:w-[22rem]"
+            >
+              <p className="text-sm font-medium text-on-surface-variant">Today's lowest price for</p>
+              <p className="mt-0.5 text-lg font-bold leading-snug">{heroItem.name.replace(/\//g, "/\u200b")}</p>
+              <p className="tabular mt-3 text-3xl font-extrabold tracking-tight">{formatFCFA(heroSummary.lowest)}</p>
+              <p className="mt-0.5 text-base text-on-surface-variant">at {heroCheapest.name}</p>
+              <div className="mt-3">
+                <TrustBadge status={heroCheapest.trust} />
+              </div>
+              {heroTypical !== null && (
+                <p className="mt-4 rounded-lg bg-primary/10 px-3 py-2 text-base font-semibold text-primary">
+                  Save {formatFCFA(heroTypical - heroSummary.lowest)} on the usual price
+                </p>
+              )}
+            </Link>
+          )}
         </div>
       </section>
 
+      {status !== "ready" || !view ? (
+        <HomeDataState status={status} error={error} onRetry={reload} />
+      ) : (
+        <>
       {/* Categories */}
       <section aria-labelledby="categories-heading" className="mx-auto w-full max-w-6xl px-4 pt-14 sm:px-6 sm:pt-16">
         <h2 id="categories-heading" className="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
@@ -370,6 +435,9 @@ const Home = () => {
         </div>
       </section>
 
+        </>
+      )}
+
       {/* Badges */}
       <section aria-labelledby="badges-heading" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <h2 id="badges-heading" className="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
@@ -401,6 +469,8 @@ const Home = () => {
         </Link>
       </section>
 
+      {providers.length > 0 && (
+        <>
       {/* Coverage */}
       <section aria-labelledby="coverage-heading" className="border-t border-outline-variant bg-surface-container-lowest">
         <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
@@ -430,6 +500,9 @@ const Home = () => {
           </ul>
         </div>
       </section>
+
+        </>
+      )}
 
       {/* Monthly report */}
       <section className="border-t border-outline-variant">

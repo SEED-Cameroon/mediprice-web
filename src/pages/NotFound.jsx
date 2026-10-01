@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const NotFound = ({
   title = "This page doesn't exist",
   message = "The link may be broken, or the page may have moved. Search for a medication instead.",
-  linkTo = "/catalogue",
+  linkTo = "/medications",
   linkLabel = "Browse medications",
 }) => (
   <div className="mx-auto w-full max-w-5xl px-4 py-20 sm:px-6 sm:py-28">

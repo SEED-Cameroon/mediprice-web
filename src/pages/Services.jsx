@@ -1,8 +1,7 @@
 import BrowsePage from '../components/BrowsePage'
-import catalog from '../data/catalog'
 import images from '../data/images'
-
-const services = catalog.filter((item) => item.kind !== 'Medication')
+import useApiFetch from '@/hooks/useApiFetch'
+import { listServices } from '@/services/catalog'
 
 const filters = [
   { param: 'type', label: 'Type', getValue: (item) => item.kind },
@@ -10,18 +9,23 @@ const filters = [
 ]
 
 export default function Services() {
+  const { data, status, error, reload } = useApiFetch(() => listServices(), [])
+
   return (
     <BrowsePage
       title="Lab test and care prices in Bamenda"
       intro="What hospitals, health centres and labs charge for tests, scans and consultations. Open one to compare every provider."
       searchLabel="Search lab tests and services"
       searchPlaceholder="Test or service, e.g. malaria test or ultrasound"
-      items={services}
+      items={data ?? []}
       filters={filters}
       noun="services"
-      image={images["Lab test"]}
       showKind
-      crossLink={{ label: 'Search medications instead', to: '/catalogue' }}
+      image={images['Lab test']}
+      crossLink={{ label: 'Search medicines instead', to: '/medications' }}
+      status={status}
+      errorMessage={error?.message}
+      onRetry={reload}
     />
   )
 }

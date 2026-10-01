@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { CircleCheck, MapPin, Navigation } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { directionsUrl } from "@/lib/pricing";
@@ -39,7 +40,12 @@ const ProviderPriceList = ({ providers = [], itemName, lowest }) => {
             <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
               <div className="min-w-0">
                 <h3 className="text-lg font-bold leading-snug text-on-surface sm:text-xl">
-                  {provider.name ?? "Unknown provider"}
+                  <Link
+                    to={`/providers/${provider.providerId}`}
+                    className="underline-offset-4 hover:text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    {provider.name ?? "Unknown provider"}
+                  </Link>
                 </h3>
                 <p className="mt-1 flex items-center gap-1.5 text-base text-on-surface-variant">
                   <MapPin className="size-4 shrink-0" aria-hidden="true" />

@@ -1,6 +1,6 @@
 import { formatAmount, formatFCFA, priceSummary } from "@/lib/format";
 import { typicalPrice } from "@/lib/pricing";
-import { getTrustLevel } from "./TrustBadge";
+import { getTrustLevel } from "@/lib/trust";
 
 /**
  * Plots every provider's price for one item on a single line, with a tick

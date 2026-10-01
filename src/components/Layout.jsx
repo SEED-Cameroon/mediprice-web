@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ChevronRight, Menu, Search, X } from "lucide-react";
+import { useCompare } from "@/context/CompareContext";
+import CompareTray from "./CompareTray";
 
 const navLinks = [
-  { label: "Medications", to: "/catalogue" },
-  { label: "Lab tests & services", to: "/services" },
-  { label: "How we check prices", to: "/about" },
+  { label: "Medicines", to: "/medications" },
+  { label: "Tests & services", to: "/labs-services" },
+  { label: "Compare", to: "/compare" },
+  { label: "How we check", to: "/about" },
 ];
 
 const footerLinks = [
   {
     heading: "Compare prices",
     links: [
-      { label: "Medications", to: "/catalogue" },
-      { label: "Lab tests", to: "/services?type=Lab+test" },
-      { label: "Care services", to: "/services?type=Care+service" },
+      { label: "Medications", to: "/medications" },
+      { label: "Lab tests", to: "/labs-services?type=Lab+test" },
+      { label: "Care services", to: "/labs-services?type=Care+service" },
     ],
   },
   {
@@ -79,7 +82,7 @@ const HeaderSearch = ({ id, className = "" }) => {
 };
 
 const desktopLinkClass = ({ isActive }) =>
-  `relative flex h-16 items-center px-3 text-[0.9375rem] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white after:absolute after:inset-x-3 after:bottom-0 after:h-1 after:rounded-t-full ${
+  `relative flex h-16 items-center whitespace-nowrap px-3 text-[0.9375rem] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white after:absolute after:inset-x-3 after:bottom-0 after:h-1 after:rounded-t-full ${
     isActive
       ? "text-white after:bg-primary-fixed-dim"
       : "text-white/85 hover:text-white after:bg-transparent hover:after:bg-white/40"
@@ -93,8 +96,16 @@ const mobileLinkClass = ({ isActive }) =>
 const Layout = () => {
   const { pathname, hash } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { items: compareItems, href: compareHref } = useCompare();
+
+  // The Compare link opens the current comparison and shows how many are in it.
+  const links = navLinks.map((link) =>
+    link.to === "/compare"
+      ? { ...link, to: compareHref, label: compareItems.length ? `Compare (${compareItems.length})` : "Compare" }
+      : link,
+  );
   // Pages that already have their own search box don't repeat it in the header.
-  const hasOwnSearch = ["/", "/catalogue", "/services", "/search"].includes(pathname);
+  const hasOwnSearch = ["/", "/medications", "/labs-services", "/search"].includes(pathname);
 
   // Close the mobile menu and start each new page at the top.
   useEffect(() => {
@@ -126,12 +137,12 @@ const Layout = () => {
             </span>
           </Link>
 
-          {!hasOwnSearch && <HeaderSearch id="header-search" className="hidden max-w-[26rem] flex-1 md:flex" />}
+          {!hasOwnSearch && <HeaderSearch id="header-search" className="hidden max-w-[24rem] flex-1 xl:flex" />}
 
           <nav aria-label="Main" className="ml-auto hidden lg:block">
             <ul className="flex items-center">
-              {navLinks.map((link) => (
-                <li key={link.to}>
+              {links.map((link) => (
+                <li key={link.label}>
                   <NavLink to={link.to} className={desktopLinkClass}>
                     {link.label}
                   </NavLink>
@@ -152,9 +163,9 @@ const Layout = () => {
           </button>
         </div>
 
-        {/* Search stays visible on phones, under the logo row */}
+        {/* Below 1280px the search sits under the logo row, so the nav never overflows */}
         {!hasOwnSearch && (
-          <div className="px-4 pb-3 sm:px-6 md:hidden">
+          <div className="mx-auto w-full max-w-6xl px-4 pb-3 sm:px-6 xl:hidden">
             <HeaderSearch id="header-search-mobile" />
           </div>
         )}
@@ -162,8 +173,8 @@ const Layout = () => {
         {menuOpen && (
           <nav id="mobile-menu" aria-label="Main" className="bg-on-primary-fixed-variant px-4 pb-4 sm:px-6 lg:hidden">
             <ul className="mx-auto max-w-6xl">
-              {navLinks.map((link) => (
-                <li key={link.to}>
+              {links.map((link) => (
+                <li key={link.label}>
                   <NavLink to={link.to} className={mobileLinkClass}>
                     {link.label}
                     <ChevronRight className="size-5 opacity-70" aria-hidden="true" />
@@ -179,7 +190,10 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className="bg-on-surface text-surface-dim">
+      <CompareTray />
+
+      {/* Leave room so the compare tray never covers the footer */}
+      <footer className={`bg-on-surface text-surface-dim ${compareItems.length > 0 && pathname !== "/compare" ? "pb-36 sm:pb-24" : ""}`}>
         <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
           <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
             <div className="max-w-[24rem]">
