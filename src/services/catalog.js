@@ -1,15 +1,12 @@
 import { ApiError, USE_SAMPLE_DATA, apiFetch } from '@/lib/api'
-import sampleMedications from '../data/Medications'
-import sampleServices from '../data/services'
 
 /**
  * Data access for medications, services, providers and comparisons.
  *
  * Pages never import data or call fetch directly; they call these
- * functions (through useApiFetch). With no VITE_API_URL set, they resolve
- * sample data after a short delay so loading states behave like the real
- * thing. With VITE_API_URL set, they call the backend and normalise its
- * response into the same shape, so pages don't change when the API is wired.
+ * functions (through useApiFetch), which call mediprice-api and normalise its
+ * response into the shape pages use. Only with VITE_USE_SAMPLE_DATA=true do
+ * they resolve bundled sample data instead (for working without a backend).
  */
 
 // ---------------------------------------------------------------------------
@@ -91,9 +88,22 @@ const SAMPLE_DELAY_MS = 250
 const sample = (value) =>
   new Promise((resolve) => setTimeout(() => resolve(structuredClone(value)), SAMPLE_DELAY_MS))
 
-const sampleItems = {
-  medication: sampleMedications.map((raw) => normaliseItem(raw, 'medication')),
-  service: sampleServices.map((raw) => normaliseItem(raw, 'service')),
+// Loaded on demand, and only in sample mode. The check on import.meta.env is
+// resolved at build time, so real builds don't contain the sample data at all.
+const loadSampleData =
+  import.meta.env.VITE_USE_SAMPLE_DATA === 'true'
+    ? () => Promise.all([import('../data/Medications'), import('../data/services')])
+    : () => Promise.reject(new ApiError('Sample data is not included in this build.'))
+
+let samplePromise
+const sampleItems = () => {
+  samplePromise ??= loadSampleData().then(
+    ([medications, services]) => ({
+      medication: medications.default.map((raw) => normaliseItem(raw, 'medication')),
+      service: services.default.map((raw) => normaliseItem(raw, 'service')),
+    }),
+  )
+  return samplePromise
 }
 
 const matches = (item, search) => {
@@ -119,14 +129,14 @@ const listQuery = (search) =>
 
 /** GET /api/medications?q= */
 export async function listMedications({ search } = {}) {
-  if (USE_SAMPLE_DATA) return sample(sampleItems.medication.filter((item) => matches(item, search)))
+  if (USE_SAMPLE_DATA) return sample((await sampleItems()).medication.filter((item) => matches(item, search)))
   const res = await apiFetch(`/medications?${listQuery(search)}`)
   return res.data.map((raw) => normaliseItem(raw, 'medication'))
 }
 
 /** GET /api/services?q= */
 export async function listServices({ search } = {}) {
-  if (USE_SAMPLE_DATA) return sample(sampleItems.service.filter((item) => matches(item, search)))
+  if (USE_SAMPLE_DATA) return sample((await sampleItems()).service.filter((item) => matches(item, search)))
   const res = await apiFetch(`/services?${listQuery(search)}`)
   return res.data.map((raw) => normaliseItem(raw, 'service'))
 }
@@ -143,7 +153,7 @@ export async function listAll(options) {
 /** GET /api/medications/:id */
 export async function getMedication(id) {
   if (USE_SAMPLE_DATA) {
-    const item = sampleItems.medication.find((entry) => entry.id === String(id))
+    const item = (await sampleItems()).medication.find((entry) => entry.id === String(id))
     if (!item) throw notFound('medication')
     return sample(item)
   }
@@ -154,7 +164,7 @@ export async function getMedication(id) {
 /** GET /api/services/:id */
 export async function getService(id) {
   if (USE_SAMPLE_DATA) {
-    const item = sampleItems.service.find((entry) => entry.id === String(id))
+    const item = (await sampleItems()).service.find((entry) => entry.id === String(id))
     if (!item) throw notFound('test or service')
     return sample(item)
   }

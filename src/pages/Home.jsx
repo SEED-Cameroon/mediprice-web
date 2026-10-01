@@ -12,7 +12,8 @@ import images from "../data/images";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { comparePrice, typicalPrice } from "@/lib/pricing";
 
-const popularSearches = ["Paracetamol", "Coartem", "Malaria test", "Ultrasound", "Blood count"];
+/** Short chip label: drops the strength, e.g. "Paracetamol 500mg" -> "Paracetamol". */
+const shortName = (name) => name.replace(/\s+\d[\d/.,]*\s*(mg|ml|g|mcg|iu)?\b.*$/i, "").trim() || name;
 
 const categoryDefs = [
   { title: "Medicines", kind: "Medication", to: "/medications", noun: "medicines" },
@@ -190,18 +191,21 @@ const Home = () => {
               </button>
             </form>
 
+            {/* The most-priced items from the database, so every chip leads somewhere */}
+            {board.length > 0 && (
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="text-base text-white/85">Popular:</span>
-              {popularSearches.map((term) => (
+              {board.map((item) => (
                 <Link
-                  key={term}
-                  to={`/search?search=${encodeURIComponent(term)}`}
+                  key={item.key}
+                  to={item.href}
                   className="inline-flex h-11 items-center rounded-lg bg-white/15 px-4 text-base font-medium text-white ring-1 ring-white/30 backdrop-blur-sm transition-colors hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
-                  {term}
+                  {shortName(item.name)}
                 </Link>
               ))}
             </div>
+            )}
           </div>
 
           {/* A real comparison, so the first thing people see is a price */}

@@ -19,15 +19,26 @@ cp .env.example .env   # then fill in real values (ask a lead)
 npm run dev
 ```
 
-## Sample data vs the live API
+## Data comes from mediprice-api
 
-With no `VITE_API_URL` set, the app runs entirely on sample data from `src/data/`, so every page works without a backend. To use the real API, add this to your `.env`:
+Every price, medicine, test and provider on screen is loaded from [mediprice-api](https://github.com/SEED-Cameroon/mediprice-api). Run it first:
 
 ```bash
-VITE_API_URL=http://localhost:5000/api   # the mediprice-api base URL
+cd ../mediprice-api
+npm run seed     # once, to fill an empty database with sample data
+npm run dev      # PORT=5001 in its .env
 ```
 
-All data goes through `src/services/catalog.js`, the only file that calls `apiFetch`. Pages load it with the `useApiFetch` hook, which handles loading and error states. If the backend's field names differ from what the app expects, adjust the `normalise*` functions at the top of `src/services/catalog.js`; no page needs to change.
+Then `npm run dev` here. Vite forwards `/api` to `http://localhost:5001` (see `vite.config.js`), so no `.env` entry or CORS setup is needed locally. To use another backend:
+
+```bash
+VITE_API_PROXY=http://localhost:5000   # local backend on a different port (dev/preview proxy)
+VITE_API_URL=https://<deployed-api>/api # deployed builds, e.g. on Vercel
+```
+
+All requests go through `src/services/catalog.js`, the only file that calls `apiFetch`. If the backend's response shape changes, adjust its `normalise*` functions; no page needs to change.
+
+**Working without a backend:** set `VITE_USE_SAMPLE_DATA=true` to use the bundled sample data in `src/data/`. It is off by default and is left out of normal builds entirely, so the live site can never show sample prices by accident. When it is on, the footer says so.
 
 ## Branch & PR rules
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { ChevronRight, Menu, Search, X } from "lucide-react";
 import { useCompare } from "@/context/CompareContext";
+import { USE_SAMPLE_DATA } from "@/lib/api";
 import CompareTray from "./CompareTray";
 
 const navLinks = [
@@ -198,7 +199,7 @@ const Layout = () => {
 
           <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm sm:flex-row sm:justify-between">
             <p>© 2026 MediPrice Cameroon, a SEED Cameroon initiative.</p>
-            <p>Prices shown are sample data while live listings are connected. Photos from Pexels.</p>
+            <p>{USE_SAMPLE_DATA ? "Showing sample prices, not live data. " : ""}Photos from Pexels.</p>
           </div>
         </div>
       </footer>

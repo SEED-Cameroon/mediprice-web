@@ -1,7 +1,15 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL
+/**
+ * Where the backend lives. Defaults to "/api", which the Vite dev and preview
+ * servers forward to mediprice-api (see vite.config.js). Set VITE_API_URL for
+ * a deployed backend, e.g. https://mediprice-api.onrender.com/api.
+ */
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
-/** True when no backend URL is configured, so the app runs on sample data. */
-export const USE_SAMPLE_DATA = !API_BASE_URL
+/**
+ * Sample data is opt-in (VITE_USE_SAMPLE_DATA=true), so the app never shows
+ * made-up prices just because a variable was forgotten.
+ */
+export const USE_SAMPLE_DATA = import.meta.env.VITE_USE_SAMPLE_DATA === 'true'
 
 /** Requests that take longer than this are aborted. */
 const TIMEOUT_MS = 10000
