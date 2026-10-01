@@ -42,6 +42,8 @@ export async function apiFetch(path, options = {}) {
   try {
     res = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
+      // Sends the httpOnly session cookie for signed-in admins and providers.
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...options.headers },
       signal: options.signal ?? controller.signal,
     })
@@ -71,4 +73,16 @@ export async function apiFetch(path, options = {}) {
   }
 
   return body
+}
+
+/**
+ * Sends a write request with a JSON body (the backend rejects other content
+ * types, as a CSRF guard). Returns `res.data`.
+ * @param {"POST" | "PATCH" | "DELETE"} method
+ * @param {string} path
+ * @param {object} [body]
+ */
+export async function apiSend(method, path, body = {}) {
+  const res = await apiFetch(path, { method, body: JSON.stringify(body) })
+  return res.data
 }

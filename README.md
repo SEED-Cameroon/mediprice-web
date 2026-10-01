@@ -40,6 +40,19 @@ All requests go through `src/services/catalog.js`, the only file that calls `api
 
 **Working without a backend:** set `VITE_USE_SAMPLE_DATA=true` to use the bundled sample data in `src/data/`. It is off by default and is left out of normal builds entirely, so the live site can never show sample prices by accident. When it is on, the footer says so.
 
+## Updating prices
+
+Go to **/sign-in** (linked as "Staff and provider sign in" in the footer).
+
+- **SEED team (admin)** lands on **/admin**. From there:
+  - **Prices:** change a price or its badge, mark it "Still the same price", see its history, or remove it.
+  - **Import:** download the CSV template, upload a filled-in file, review every row (added, updated, no change, or why it can't be imported), then confirm.
+  - **Medicines & tests** and **Providers:** add, edit and delete them.
+  - **Accounts:** create a sign-in for each pharmacy, lab or hospital.
+- **Providers** land on **/provider**, where they update their own prices (always shown as "Confirmed by provider") and their contact details.
+
+The first admin account is created in mediprice-api with `npm run create-admin`.
+
 ## Branch & PR rules
 
 Read [CONTRIBUTING.md](./CONTRIBUTING.md) before your first commit. Short version: never push to `main`, branch per feature, small PRs, one review required.

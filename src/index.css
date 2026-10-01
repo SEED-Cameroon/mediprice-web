@@ -94,6 +94,9 @@
     --color-input: var(--input);
     --color-ring: var(--ring);
 
+    /* WARNING: these named spacing tokens also change Tailwind's max-w-sm,
+       max-w-md, max-w-lg and max-w-xl to 8px, 16px, 24px and 48px. For
+       widths use bracket values (max-w-[28rem]) or max-w-2xl and larger. */
     --spacing-base: 4px;
     --spacing-xs: 4px;
     --spacing-sm: 8px;

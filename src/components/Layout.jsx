@@ -27,6 +27,7 @@ const footerLinks = [
       { label: "How it works", to: "/#how-it-works" },
       { label: "What the badges mean", to: "/about#badges" },
       { label: "Our mission", to: "/about" },
+      { label: "Staff and provider sign in", to: "/sign-in" },
     ],
   },
 ];
