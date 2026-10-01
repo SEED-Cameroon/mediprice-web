@@ -6,6 +6,8 @@ import Home from './pages/Home'
 import Catalogue from './pages/Catalogue'
 import Services from './pages/Services'
 import About from './pages/About'
+import NotFound from './pages/NotFound'
+import Search from './pages/Search'
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
           <Route path="/catalogue" element={<Catalogue />} />
           <Route path="/services" element={<Services />} />
           <Route path="/about" element={<About />} />
+          <Route path="/search" element={<Search />} />
 
           <Route
             path="/medication/:id"
@@ -26,6 +29,8 @@ function App() {
             path="/service/:id"
             element={<ServiceDetail />}
           />
+
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

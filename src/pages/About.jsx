@@ -1,153 +1,176 @@
-import { Database, ShieldCheck, PiggyBank } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import TrustBadge from "../components/TrustBadge";
+import images from "../data/images";
 
-const steps = [
+const sourcingSteps = [
   {
-    icon: Database,
-    title: "1. We source prices",
+    title: "We collect prices",
     description:
-      "We continuously gather pricing data from local pharmacies, diagnostic labs, and hospitals across Bamenda.",
+      "Our team visits pharmacies, labs and hospitals across Bamenda and records what they charge. Providers can also send us their own price lists, and patients can share what they paid.",
   },
   {
-    icon: ShieldCheck,
-    title: "2. We verify data",
+    title: "We label where each price came from",
     description:
-      "Every price point is passed through our trust-badge system to check its reliability and accuracy.",
+      "Every price is tagged with its source and the date it was last checked, so you can judge how much to rely on it.",
   },
   {
-    icon: PiggyBank,
-    title: "3. You save",
+    title: "We keep checking",
     description:
-      "You compare verified prices, choose the best option for your budget, and spend less on healthcare.",
+      "Prices are rechecked regularly. When a provider's price changes, the old price is replaced and the date is updated.",
   },
 ];
 
 const trustTiers = [
   {
     status: "SEED-verified",
-    title: "Highest trust",
+    title: "The most reliable",
     description:
-      "Prices checked and verified by the SEED team on-site. This data is guaranteed accurate at the time of verification.",
+      "A member of the SEED team confirmed this price in person at the provider, or through a direct audit of their price list.",
   },
   {
     status: "Provider-verified",
-    title: "High trust",
+    title: "Reliable",
     description:
-      "Prices confirmed directly by the pharmacy or hospital management through their own listing.",
+      "The pharmacy, lab or hospital's management confirmed this price with us directly.",
   },
   {
     status: "Community-reported",
-    title: "Estimate",
+    title: "A useful estimate",
     description:
-      "Unverified prices submitted by patients. Useful as a baseline, but may be out of date.",
+      "A patient shared this price from a recent receipt. We haven't confirmed it yet, so it may be out of date.",
   },
 ];
 
 const About = () => {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) return;
+    document.querySelector(hash)?.scrollIntoView({ block: "start" });
+  }, [hash]);
+
   return (
-    <main className="flex flex-col">
-      {/* Mission */}
-      <section className="bg-surface-container-low py-xl">
-        <div className="mx-auto max-w-3xl px-gutter">
-          <h1 className="mb-lg font-display text-display-lg font-bold text-on-surface">
-            Our mission: healthcare transparency for Bamenda.
-          </h1>
+    <>
+      <header className="relative isolate overflow-hidden bg-on-primary-fixed text-white">
+        <img src={images.about.src} alt="" className="absolute inset-0 -z-10 size-full object-cover" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-r from-on-primary-fixed/95 via-on-primary-fixed/80 to-on-primary-fixed/30"
+        />
+        <div className="mx-auto w-full max-w-5xl px-4 py-14 sm:px-6 sm:py-20">
+          <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-5xl">Why MediPrice exists</h1>
+          <div className="mt-6 max-w-[38rem] space-y-4 text-lg leading-8 text-white/90">
+            <p>
+              In Bamenda, the price of the same medicine or test can change a
+              lot from one provider to the next, and most people only find out
+              at the counter. For families paying out of pocket, that
+              difference matters.
+            </p>
+            <p>
+              MediPrice collects those prices in one place and shows where each
+              one came from, so you can choose where to go before you leave home.
+            </p>
+          </div>
+        </div>
+      </header>
 
-          <p className="mb-lg text-body-lg text-on-surface-variant">
-            At MediPrice Cameroon, we believe access to accurate pricing
-            information is a fundamental right. In Bamenda and across the
-            region, fluctuating costs for essential medications and
-            procedures create a real financial burden. Our platform helps
-            people make informed decisions with clear, verifiable data —
-            reducing anxiety and healthcare costs alike.
-          </p>
+    <div className="mx-auto w-full max-w-5xl px-4 pb-20 sm:px-6">
+      {/* Sourcing */}
+      <section aria-labelledby="sourcing" className="pt-14 sm:pt-16">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+          <div>
+            <h2 id="sourcing" className="text-2xl font-bold tracking-tight text-on-surface">
+              Where the prices come from
+            </h2>
+          </div>
 
-          <p className="text-body-lg text-on-surface-variant">
-            We're building a centralized resource for medical pricing you
-            can trust when it matters most.
-          </p>
+          <ol className="space-y-8">
+            {sourcingSteps.map((step, index) => (
+              <li key={step.title} className="grid grid-cols-[2rem_1fr] gap-x-3">
+                <span
+                  className="tabular flex size-8 items-center justify-center rounded-full bg-on-surface text-sm font-bold text-surface-container-lowest"
+                  aria-hidden="true"
+                >
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold leading-8 text-on-surface">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 max-w-prose text-base leading-7 text-on-surface-variant">
+                    {step.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* How MediPrice works */}
-      <section className="border-y border-outline-variant bg-surface-container-lowest py-xl">
-        <div className="mx-auto max-w-container-max px-gutter">
-          <div className="mb-xl text-center">
-            <h2 className="mb-2 font-display text-headline-lg font-bold text-on-surface">
-              How MediPrice works
+      {/* Badges */}
+      <section
+        id="badges"
+        aria-labelledby="badges-heading"
+        className="mt-16 scroll-mt-24 border-t border-outline-variant pt-12 sm:mt-20"
+      >
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:gap-16">
+          <div>
+            <h2 id="badges-heading" className="text-2xl font-bold tracking-tight text-on-surface">
+              What the badges mean
             </h2>
-            <p className="mx-auto max-w-2xl text-body-lg text-on-surface-variant">
-              Three steps to finding the best healthcare prices.
+            <p className="mt-3 text-base leading-7 text-on-surface-variant">
+              Every price carries one of three badges. They tell you who
+              confirmed the price, not whether it is cheap.
             </p>
           </div>
 
-          <div className="relative grid gap-lg md:grid-cols-3">
-            <div
-              aria-hidden="true"
-              className="absolute left-[15%] right-[15%] top-8 hidden h-px bg-outline-variant md:block"
-            />
-
-            {steps.map(({ icon: Icon, title, description }) => (
-              <div
-                key={title}
-                className="relative flex flex-col items-center rounded-xl border border-outline-variant bg-surface p-lg text-center"
-              >
-                <div className="mb-lg flex size-16 items-center justify-center rounded-full border-2 border-surface-container-lowest bg-surface-container-high text-primary shadow-sm">
-                  <Icon className="size-7" aria-hidden="true" />
+          <ul className="divide-y divide-outline-variant overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm ring-1 ring-outline-variant/70">
+            {trustTiers.map((tier) => (
+              <li key={tier.status} className="p-5 sm:p-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  <TrustBadge status={tier.status} />
+                  <p className="font-semibold text-on-surface">{tier.title}</p>
                 </div>
-
-                <h3 className="mb-2 font-display text-title-md font-bold text-on-surface">
-                  {title}
-                </h3>
-
-                <p className="text-body-sm text-on-surface-variant">
-                  {description}
+                <p className="mt-3 max-w-prose text-base leading-7 text-on-surface-variant">
+                  {tier.description}
                 </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Trust badge system */}
-      <section className="py-xl">
-        <div className="mx-auto max-w-container-max px-gutter">
-          <div className="grid gap-xl md:grid-cols-12">
-            <div className="md:col-span-4">
-              <h2 className="mb-2 font-display text-headline-lg font-bold text-on-surface">
-                What each badge means
-              </h2>
-
-              <p className="text-body-lg text-on-surface-variant">
-                We combine data straight from providers with data reported by
-                the community, so every price on MediPrice carries one of
-                these three trust levels.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-md md:col-span-8">
-              {trustTiers.map(({ status, title, description }) => (
-                <div
-                  key={status}
-                  className="flex flex-col items-start gap-md rounded-lg border border-outline-variant bg-surface-container-lowest p-md sm:flex-row sm:items-center"
-                >
-                  <div className="shrink-0">
-                    <TrustBadge status={status} />
-                  </div>
-
-                  <p className="text-body-sm text-on-surface">
-                    <strong className="font-semibold text-on-background">
-                      {title}:
-                    </strong>{" "}
-                    {description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Caveat + SEED */}
+      <section className="mt-16 grid gap-6 border-t border-outline-variant pt-12 sm:mt-20 md:grid-cols-2">
+        <div className="rounded-lg bg-surface-container-low p-6">
+          <h2 className="text-lg font-bold text-on-surface">
+            Always confirm before you pay
+          </h2>
+          <p className="mt-2 text-base leading-7 text-on-surface-variant">
+            Prices can change between our checks. Treat MediPrice as a guide,
+            and confirm the price with the provider before buying.
+          </p>
+        </div>
+        <div className="rounded-lg bg-surface-container-low p-6">
+          <h2 className="text-lg font-bold text-on-surface">Run by SEED Cameroon</h2>
+          <p className="mt-2 text-base leading-7 text-on-surface-variant">
+            MediPrice is a SEED Cameroon initiative to make the cost of
+            healthcare in the North West region easier to see and compare.
+          </p>
         </div>
       </section>
-    </main>
+
+      <div className="mt-12">
+        <Link
+          to="/catalogue"
+          className="inline-flex h-12 items-center rounded-lg bg-primary px-6 text-base font-semibold text-on-primary hover:bg-on-primary-fixed-variant focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          Compare medication prices
+        </Link>
+      </div>
+    </div>
+    </>
   );
 };
 

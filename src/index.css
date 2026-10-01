@@ -14,9 +14,7 @@
  * components render in-brand without extra overrides.
  */
 @theme inline {
-    --font-sans: "Inter", sans-serif;
-    --font-display: "Hanken Grotesk", sans-serif;
-    --font-mono: "JetBrains Mono", monospace;
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
     --text-display-lg: 48px;
     --text-display-lg--line-height: 56px;
@@ -195,10 +193,27 @@
     }
 }
 
-.material-symbols-outlined {
-    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+.tabular {
+    font-variant-numeric: tabular-nums;
 }
 
-.hero-gradient {
-    background: linear-gradient(rgba(0, 42, 27, 0.7), rgba(0, 42, 27, 0.85));
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* The one orchestrated moment: price markers settle onto the spread bar. */
+@keyframes spread-in {
+  from {
+    opacity: 0;
+    scale: 0.3;
+  }
+}
+
+.spread-marker {
+  animation: spread-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
