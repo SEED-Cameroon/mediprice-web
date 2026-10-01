@@ -33,8 +33,10 @@ Then `npm run dev` here. Vite forwards `/api` to `http://localhost:5001` (see `v
 
 ```bash
 VITE_API_PROXY=http://localhost:5000   # local backend on a different port (dev/preview proxy)
-VITE_API_URL=https://<deployed-api>/api # deployed builds, e.g. on Vercel
+VITE_API_URL=https://<deployed-api>/api # only if not using the Vercel rewrite below
 ```
+
+On Vercel, `vercel.json` forwards `/api/*` to the Render API (`mediprice-api-5vx4.onrender.com`), so the site and API look like one site to the browser: no CORS or cross-site cookie setup is needed. Update that address there if the API moves.
 
 All requests go through `src/services/catalog.js`, the only file that calls `apiFetch`. If the backend's response shape changes, adjust its `normalise*` functions; no page needs to change.
 
