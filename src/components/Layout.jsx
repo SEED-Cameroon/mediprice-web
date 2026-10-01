@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { ChevronRight, Menu, Search, X } from "lucide-react";
 import { useCompare } from "@/context/CompareContext";
 import CompareTray from "./CompareTray";
@@ -45,42 +45,6 @@ const Logo = ({ className = "" }) => (
   </svg>
 );
 
-const HeaderSearch = ({ id, className = "" }) => {
-  const navigate = useNavigate();
-  const [term, setTerm] = useState("");
-
-  const submit = (event) => {
-    event.preventDefault();
-    const value = term.trim();
-    navigate(value ? `/search?search=${encodeURIComponent(value)}` : "/search");
-    setTerm("");
-  };
-
-  return (
-    <form role="search" onSubmit={submit} className={`flex ${className}`}>
-      <label htmlFor={id} className="sr-only">
-        Search medicines, lab tests and services
-      </label>
-      <input
-        id={id}
-        type="search"
-        value={term}
-        onChange={(event) => setTerm(event.target.value)}
-        placeholder="Search a medicine or test"
-        autoComplete="off"
-        className="h-11 min-w-0 flex-1 rounded-l-lg border-0 bg-white px-4 text-base text-on-surface outline-none placeholder:text-outline focus:ring-4 focus:ring-primary-fixed-dim focus:ring-inset"
-      />
-      <button
-        type="submit"
-        className="flex h-11 w-12 shrink-0 items-center justify-center rounded-r-lg bg-on-primary-fixed text-white transition-colors hover:bg-black focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-fixed-dim"
-      >
-        <Search className="size-5" aria-hidden="true" />
-        <span className="sr-only">Search</span>
-      </button>
-    </form>
-  );
-};
-
 const desktopLinkClass = ({ isActive }) =>
   `relative flex h-16 items-center whitespace-nowrap px-3 text-[0.9375rem] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white after:absolute after:inset-x-3 after:bottom-0 after:h-1 after:rounded-t-full ${
     isActive
@@ -104,8 +68,6 @@ const Layout = () => {
       ? { ...link, to: compareHref, label: compareItems.length ? `Compare (${compareItems.length})` : "Compare" }
       : link,
   );
-  // Pages that already have their own search box don't repeat it in the header.
-  const hasOwnSearch = ["/", "/medications", "/labs-services", "/search"].includes(pathname);
 
   // Close the mobile menu and start each new page at the top.
   useEffect(() => {
@@ -137,8 +99,6 @@ const Layout = () => {
             </span>
           </Link>
 
-          {!hasOwnSearch && <HeaderSearch id="header-search" className="hidden max-w-[24rem] flex-1 xl:flex" />}
-
           <nav aria-label="Main" className="ml-auto hidden lg:block">
             <ul className="flex items-center">
               {links.map((link) => (
@@ -151,24 +111,26 @@ const Layout = () => {
             </ul>
           </nav>
 
+          {/* A compact Search button instead of a full search box keeps the bar uncluttered */}
+          <Link
+            to="/search"
+            className="ml-auto flex h-11 shrink-0 items-center gap-2 rounded-lg bg-white/10 px-3 text-base font-semibold text-white ring-1 ring-white/30 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:ml-2"
+          >
+            <Search className="size-5" aria-hidden="true" />
+            <span className="max-sm:sr-only">Search</span>
+          </Link>
+
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
-            className="ml-auto flex h-11 items-center gap-2 rounded-lg px-3 text-base font-semibold text-white ring-1 ring-white/40 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
+            className="flex h-11 items-center gap-2 rounded-lg px-3 text-base font-semibold text-white ring-1 ring-white/40 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
           >
             {menuOpen ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
             {menuOpen ? "Close" : "Menu"}
           </button>
         </div>
-
-        {/* Below 1280px the search sits under the logo row, so the nav never overflows */}
-        {!hasOwnSearch && (
-          <div className="mx-auto w-full max-w-6xl px-4 pb-3 sm:px-6 xl:hidden">
-            <HeaderSearch id="header-search-mobile" />
-          </div>
-        )}
 
         {menuOpen && (
           <nav id="mobile-menu" aria-label="Main" className="bg-on-primary-fixed-variant px-4 pb-4 sm:px-6 lg:hidden">

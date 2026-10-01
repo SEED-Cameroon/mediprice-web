@@ -35,6 +35,7 @@ const sorters = {
  * @param {boolean} [props.showKind] - show the item type in each row
  * @param {{ label: string, to: string }} [props.crossLink] - suggestion shown when nothing matches
  * @param {{ src: string, alt: string }} [props.image] - photo shown beside the title
+ * @param {boolean} [props.autoFocusSearch] - put the cursor in the search box on arrival
  * @param {"ready" | "loading" | "error"} [props.status]
  * @param {string} [props.errorMessage]
  * @param {() => void} [props.onRetry]
@@ -50,6 +51,7 @@ const BrowsePage = ({
   showKind = false,
   crossLink,
   image,
+  autoFocusSearch = false,
   status = "ready",
   errorMessage,
   onRetry,
@@ -131,6 +133,7 @@ const BrowsePage = ({
               onChange={(value) => updateParam("search", value)}
               placeholder={searchPlaceholder}
               size="lg"
+              autoFocus={autoFocusSearch}
             />
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Search, X } from "lucide-react";
 /**
  * Search input with a leading icon and a clear button.
  */
-const SearchField = ({ id, label, value, onChange, placeholder, size = "md" }) => {
+const SearchField = ({ id, label, value, onChange, placeholder, size = "md", autoFocus = false }) => {
   const large = size === "lg";
 
   return (
@@ -24,6 +24,7 @@ const SearchField = ({ id, label, value, onChange, placeholder, size = "md" }) =
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         autoComplete="off"
+        autoFocus={autoFocus}
         className={`w-full rounded-lg border border-outline-variant bg-surface-container-lowest pr-12 text-base text-on-surface outline-none transition placeholder:text-outline focus:border-primary focus:ring-3 focus:ring-primary/20 [&::-webkit-search-cancel-button]:hidden ${large ? "h-14 pl-12" : "h-12 pl-11"}`}
       />
 

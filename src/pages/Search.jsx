@@ -25,6 +25,7 @@ const Search = () => {
       noun="results"
       showKind
       image={images.hero}
+      autoFocusSearch
       status={status}
       errorMessage={error?.message}
       onRetry={reload}
