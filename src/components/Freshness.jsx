@@ -11,7 +11,7 @@ const Freshness = ({ date, className = "" }) => {
 
   return (
     <span
-      className={`inline-flex items-start gap-1.5 text-sm ${stale ? "text-tertiary" : "text-on-surface-variant"} ${className}`}
+      className={`inline-flex items-start gap-1.5 ${/\btext-(xs|sm|base|lg)\b/.test(className) ? "" : "text-sm"} ${stale ? "text-tertiary" : "text-on-surface-variant"} ${className}`}
       title={date ? formatDate(date) : undefined}
     >
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />

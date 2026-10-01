@@ -1,19 +1,35 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Check, FileText } from "lucide-react";
-import { formatAmount, formatFCFA, priceSummary } from "@/lib/format";
-import { daysSince, freshness, trustRank, typicalPrice } from "@/lib/pricing";
+import {
+  ArrowDown,
+  ArrowLeft,
+  Check,
+  FileText,
+  FlaskConical,
+  MapPin,
+  Navigation,
+  Pill,
+  Stethoscope,
+} from "lucide-react";
+import { formatFCFA, priceSummary } from "@/lib/format";
+import { daysSince, directionsUrl, trustRank, typicalPrice } from "@/lib/pricing";
 import catalog from "../data/catalog";
-import images from "../data/images";
-import ComparisonTable from "./ComparisonTable";
+import Freshness from "./Freshness";
 import PriceListRow from "./PriceListRow";
 import PriceSpread from "./PriceSpread";
-import { trustLevels } from "./TrustBadge";
+import ProviderPriceList from "./ProviderPriceList";
+import TrustBadge from "./TrustBadge";
+
+const kindIcons = {
+  Medication: Pill,
+  "Lab test": FlaskConical,
+  "Care service": Stethoscope,
+};
 
 const sortOptions = [
-  { value: "price", label: "Cheapest" },
-  { value: "trust", label: "Most trusted" },
-  { value: "recent", label: "Latest check" },
+  { value: "price", label: "Cheapest first" },
+  { value: "trust", label: "Most trusted first" },
+  { value: "recent", label: "Most recently checked" },
 ];
 
 const sorters = {
@@ -22,23 +38,26 @@ const sorters = {
   recent: (a, b) => (daysSince(a.updatedAt) ?? Infinity) - (daysSince(b.updatedAt) ?? Infinity),
 };
 
+/** Sorting only helps once there are enough prices to scan. */
+const MIN_PRICES_FOR_SORT = 4;
+
 /**
- * Detail page shared by medications and services. Leads with the answer
- * (where it's cheapest and what that saves), then the evidence.
+ * Detail page shared by medications and services. Answer first (where it's
+ * cheapest and how to get there), then every price as a simple card.
+ * Written and sized for everyone: plain words, 16px+ text, large buttons.
  */
 const ItemDetail = ({ item, backTo, backLabel }) => {
   const [sort, setSort] = useState("price");
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [checkedOnly, setCheckedOnly] = useState(false);
 
   const { lowest, highest, count } = priceSummary(item.providers);
   const typical = typicalPrice(item.providers);
   const cheapest = item.providers.find((provider) => provider.price === lowest);
-  const savingVsTypical = typical !== null ? typical - lowest : 0;
-  const newest = [...item.providers].sort(sorters.recent)[0];
-  const verifiedCount = item.providers.filter((p) => p.trust !== "Community-reported").length;
+  const unverifiedCount = item.providers.filter((p) => p.trust === "Community-reported").length;
+  const KindIcon = kindIcons[item.kind] ?? Pill;
 
   const rows = item.providers
-    .filter((provider) => !verifiedOnly || provider.trust !== "Community-reported")
+    .filter((provider) => !checkedOnly || provider.trust !== "Community-reported")
     .sort(sorters[sort]);
 
   // Same category first, then others of the same group (medications vs services).
@@ -52,204 +71,219 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
   ].slice(0, 3);
 
   const tips = [
-    item.requiresPrescription && "Bring your prescription. You'll need it to buy this medicine.",
-    `The prices below are for ${item.priceFor.toLowerCase()}. Check you're being quoted for the same thing.`,
-    "Call ahead or ask at the counter to confirm the price before you pay.",
-    item.kind === "Medication" && "Ask whether a cheaper generic brand of the same medicine is available.",
+    item.requiresPrescription && "Bring your prescription. You need it to buy this medicine.",
+    `These prices are for ${item.priceFor.toLowerCase()}. Make sure you are quoted for the same.`,
+    "Prices can change. Ask for the price before you pay.",
+    isMedication && "Ask if there is a cheaper brand of the same medicine.",
   ].filter(Boolean);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-6 sm:px-6 sm:pt-8">
+    <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6 sm:pt-8">
       <Link
         to={backTo}
-        className="inline-flex h-10 items-center gap-2 rounded-md text-sm font-medium text-on-surface-variant hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="inline-flex h-11 items-center gap-2 rounded-lg text-base font-medium text-on-surface-variant hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        <ArrowLeft className="size-4" aria-hidden="true" />
+        <ArrowLeft className="size-5" aria-hidden="true" />
         {backLabel}
       </Link>
 
-      <div className="mt-4 grid gap-10 lg:grid-cols-[1fr_20rem] lg:gap-12">
+      <div className="mt-3 grid gap-10 lg:grid-cols-[1fr_20rem] lg:gap-12">
         <div className="min-w-0">
           {/* What it is */}
-          <header className="relative">
-            {images[item.kind] && (
-              <img
-                src={images[item.kind].src}
-                alt=""
-                className="mb-5 h-40 w-full rounded-2xl object-cover sm:h-48"
-              />
-            )}
-            <p className="text-sm text-on-surface-variant">
-              {item.kind}, {item.category.toLowerCase()}
-            </p>
-            <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-on-surface break-words sm:text-4xl">
-              {/* Allow long names like "Artemether/Lumefantrine" to wrap after the slash. */}
-            {item.name.replace(/\//g, "/\u200b")}
-            </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center rounded-md border border-outline-variant bg-surface-container-lowest px-2.5 py-1 text-sm text-on-surface">
-                <span className="text-on-surface-variant">Price for:&nbsp;</span>
-                <span className="font-medium">{item.priceFor}</span>
-              </span>
-              {item.requiresPrescription && (
-                <span className="inline-flex items-center gap-1.5 rounded-md bg-surface-container px-2.5 py-1 text-sm font-medium text-on-surface">
-                  <FileText className="size-4" aria-hidden="true" />
-                  Prescription needed
-                </span>
-              )}
-            </div>
-            {item.description && (
-              <p className="mt-4 max-w-[42rem] text-base leading-7 text-on-surface-variant sm:text-lg sm:leading-8">
-                {item.description}
+          <header className="flex gap-4">
+            <span
+              className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary sm:size-16"
+              aria-hidden="true"
+            >
+              <KindIcon className="size-7 sm:size-8" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-base text-on-surface-variant">
+                {item.kind}, {item.category.toLowerCase()}
               </p>
-            )}
+              <h1 className="mt-0.5 break-words text-3xl font-extrabold tracking-tight text-on-surface sm:text-4xl">
+                {/* Allow long names like "Artemether/Lumefantrine" to wrap after the slash. */}
+                {item.name.replace(/\//g, "/​")}
+              </h1>
+            </div>
           </header>
 
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center rounded-lg bg-surface-container px-3 py-1.5 text-base text-on-surface">
+              Price is for:&nbsp;<strong className="font-semibold">{item.priceFor}</strong>
+            </span>
+            {item.requiresPrescription && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-tertiary/10 px-3 py-1.5 text-base font-semibold text-tertiary">
+                <FileText className="size-5" aria-hidden="true" />
+                Prescription needed
+              </span>
+            )}
+          </div>
+
+          {item.description && (
+            <p className="mt-4 max-w-[40rem] text-lg leading-8 text-on-surface-variant">
+              {item.description}
+            </p>
+          )}
+
           {/* The answer */}
-          {count > 0 && (
+          {cheapest && (
             <section
-              aria-labelledby="summary-heading"
-              className="mt-8 overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm ring-1 ring-primary/25"
+              aria-labelledby="answer-heading"
+              className="mt-8 rounded-3xl bg-primary/[0.06] p-5 ring-2 ring-primary sm:p-7"
             >
-              <div className="bg-primary/5 p-5 sm:p-6">
-                <h2 id="summary-heading" className="text-sm font-semibold text-primary">
-                  {count > 1 ? "Cheapest option we found" : "The only price we have so far"}
-                </h2>
-                <p className="mt-2 text-lg leading-7 text-on-surface sm:text-xl sm:leading-8">
-                  <strong className="tabular text-2xl font-extrabold sm:text-3xl">{formatFCFA(lowest)}</strong>{" "}
-                  at <strong className="font-semibold">{cheapest.name}</strong>
-                  {cheapest.area && <>, {cheapest.area}</>}.
-                </p>
-                {count > 1 && (
-                  <p className="mt-1 text-base text-on-surface-variant">
-                    {savingVsTypical > 0 ? (
-                      <>
-                        That's <span className="tabular font-semibold text-primary">{formatFCFA(savingVsTypical)} less</span>{" "}
-                        than the typical price, and{" "}
-                        <span className="tabular font-semibold text-on-surface">{formatFCFA(highest - lowest)} less</span>{" "}
-                        than the most expensive provider.
-                      </>
-                    ) : (
-                      <>
-                        That's <span className="tabular font-semibold text-primary">{formatFCFA(highest - lowest)} less</span>{" "}
-                        than the most expensive provider.
-                      </>
-                    )}
-                  </p>
-                )}
+              <h2 id="answer-heading" className="text-base font-bold text-primary">
+                {count > 1 ? "Cheapest place we found" : "The only price we have so far"}
+              </h2>
+
+              <p className="tabular mt-2 text-4xl font-extrabold tracking-tight text-on-surface sm:text-5xl">
+                {formatFCFA(lowest)}
+              </p>
+
+              <p className="mt-3 text-xl font-bold text-on-surface">{cheapest.name}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-base text-on-surface-variant">
+                <MapPin className="size-5 shrink-0" aria-hidden="true" />
+                {[cheapest.type, cheapest.area].filter(Boolean).join(", ")}
+              </p>
+
+              <div className="mt-4 flex flex-col items-start gap-2">
+                <TrustBadge status={cheapest.trust} showSummary />
+                <Freshness date={cheapest.updatedAt} className="text-base" />
               </div>
 
               {count > 1 && (
-                <div className="border-t border-primary/15 p-5 sm:p-6">
-                  <PriceSpread providers={item.providers} size="lg" />
-                </div>
+                <ul className="mt-5 space-y-2 border-t border-primary/20 pt-4 text-lg text-on-surface">
+                  <li className="flex gap-2.5">
+                    <Check className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+                    <span>
+                      You save <strong className="tabular font-bold">{formatFCFA(highest - lowest)}</strong>{" "}
+                      compared with the most expensive place.
+                    </span>
+                  </li>
+                  {typical !== null && (
+                    <li className="flex gap-2.5">
+                      <Check className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" />
+                      <span>
+                        The usual price in Bamenda is{" "}
+                        <strong className="tabular font-bold">{formatFCFA(typical)}</strong>.
+                      </span>
+                    </li>
+                  )}
+                </ul>
               )}
 
-              <dl className="grid grid-cols-2 divide-outline-variant border-t border-outline-variant text-sm sm:grid-cols-4 sm:divide-x">
-                {[
-                  ["Typical price", typical !== null ? formatFCFA(typical) : "Needs 3+ prices"],
-                  ["Price range", count > 1 ? `${formatAmount(lowest)} to ${formatFCFA(highest)}` : formatFCFA(lowest)],
-                  ["Providers", `${count}, ${verifiedCount === count ? "all" : verifiedCount} verified`],
-                  ["Latest check", freshness(newest.updatedAt).label.replace("Checked ", "")],
-                ].map(([term, value]) => (
-                  <div key={term} className="px-5 py-3 sm:px-6">
-                    <dt className="text-on-surface-variant">{term}</dt>
-                    <dd className="tabular mt-0.5 font-semibold text-on-surface">{value}</dd>
-                  </div>
-                ))}
-              </dl>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href={directionsUrl(cheapest)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 text-lg font-bold text-on-primary shadow-sm transition-colors hover:bg-on-primary-fixed-variant focus:outline-none focus-visible:ring-4 focus-visible:ring-primary/40"
+                >
+                  <Navigation className="size-5" aria-hidden="true" />
+                  Get directions
+                  <span className="sr-only"> to {cheapest.name} (opens Google Maps)</span>
+                </a>
+                {count > 1 && (
+                  <a
+                    href="#all-prices"
+                    className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-surface-container-lowest px-6 text-lg font-semibold text-on-surface ring-1 ring-outline-variant transition-colors hover:ring-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <ArrowDown className="size-5" aria-hidden="true" />
+                    See all {count} prices
+                  </a>
+                )}
+              </div>
             </section>
           )}
 
-          {/* The evidence */}
-          <section aria-labelledby="comparison-heading" className="mt-10">
-            <h2 id="comparison-heading" className="text-2xl font-bold tracking-tight text-on-surface">
-              Compare all {count} {count === 1 ? "provider" : "providers"}
+          {/* Every price */}
+          <section id="all-prices" aria-labelledby="all-prices-heading" className="mt-12 scroll-mt-24">
+            <h2 id="all-prices-heading" className="text-2xl font-bold tracking-tight text-on-surface">
+              All prices ({count})
             </h2>
-
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <div role="group" aria-label="Sort providers" className="inline-flex rounded-lg bg-surface-container-low p-1">
-                {sortOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    aria-pressed={sort === option.value}
-                    onClick={() => setSort(option.value)}
-                    className={`h-9 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                      sort === option.value
-                        ? "bg-surface-container-lowest text-on-surface shadow-sm"
-                        : "text-on-surface-variant hover:text-on-surface"
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              {verifiedCount < count && (
-                <label className="inline-flex h-9 cursor-pointer items-center gap-2 text-sm text-on-surface">
-                  <input
-                    type="checkbox"
-                    checked={verifiedOnly}
-                    onChange={(event) => setVerifiedOnly(event.target.checked)}
-                    className="size-4 accent-primary"
-                  />
-                  Only verified prices
-                </label>
-              )}
-            </div>
-
-            <div className="mt-4">
-              <ComparisonTable providers={rows} itemName={item.name} typical={typical} lowest={lowest} />
-            </div>
-
-            <p className="mt-3 text-sm text-on-surface-variant">
-              {typical !== null
-                ? "“Typical” is the middle price across all providers we've checked. "
-                : "We show a typical price once we have 3 or more prices. "}
-              <Link to="/about#badges" className="font-medium text-primary underline-offset-4 hover:underline">
-                How we verify prices
-              </Link>
+            <p className="mt-1 text-base text-on-surface-variant">
+              {sort === "price" ? "Cheapest first." : sortOptions.find((o) => o.value === sort).label + "."}
             </p>
+
+            {count >= 3 && (
+              <div className="mt-5 rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70">
+                <p className="mb-3 text-base font-semibold text-on-surface">How the prices compare</p>
+                <PriceSpread providers={item.providers} size="lg" />
+              </div>
+            )}
+
+            {(count >= MIN_PRICES_FOR_SORT || unverifiedCount > 0) && (
+              <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
+                {count >= MIN_PRICES_FOR_SORT && (
+                  <label className="flex items-center gap-2 text-base text-on-surface">
+                    Show
+                    <select
+                      value={sort}
+                      onChange={(event) => setSort(event.target.value)}
+                      className="h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-base font-medium text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    >
+                      {sortOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+
+                {unverifiedCount > 0 && (
+                  <label className="inline-flex min-h-11 cursor-pointer items-center gap-3 text-base text-on-surface">
+                    <input
+                      type="checkbox"
+                      checked={checkedOnly}
+                      onChange={(event) => setCheckedOnly(event.target.checked)}
+                      className="size-5 accent-primary"
+                    />
+                    Only show checked prices
+                  </label>
+                )}
+              </div>
+            )}
+
+            <div className="mt-5">
+              <ProviderPriceList providers={rows} itemName={item.name} lowest={lowest} />
+            </div>
           </section>
         </div>
 
-        {/* Sidebar */}
-        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-          <section className="rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70">
-            <h2 className="text-base font-bold text-on-surface">Before you go</h2>
-            <ul className="mt-3 space-y-3">
+        {/* Tips */}
+        <aside className="lg:sticky lg:top-24 lg:self-start">
+          <section className="rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70 sm:p-6">
+            <h2 className="text-xl font-bold text-on-surface">Before you go</h2>
+            <ul className="mt-4 space-y-4">
               {tips.map((tip) => (
-                <li key={tip} className="flex gap-2.5 text-sm leading-6 text-on-surface">
-                  <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                <li key={tip} className="flex gap-3 text-base leading-7 text-on-surface">
+                  <span
+                    className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                    aria-hidden="true"
+                  >
+                    <Check className="size-4" strokeWidth={3} />
+                  </span>
                   {tip}
                 </li>
               ))}
             </ul>
-          </section>
-
-          <section className="rounded-2xl bg-surface-container-low p-5">
-            <h2 className="text-base font-bold text-on-surface">Who checked these prices</h2>
-            <ul className="mt-3 space-y-2.5">
-              {Object.entries(trustLevels).map(([key, level]) => (
-                <li key={key} className="flex gap-2.5 text-sm leading-6 text-on-surface-variant">
-                  <span className={`mt-1.5 size-2.5 shrink-0 rounded-full ${level.dot}`} aria-hidden="true" />
-                  <span>
-                    <span className="font-semibold text-on-surface">{level.label}:</span> {level.summary}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <Link
+              to="/about#badges"
+              className="mt-5 inline-flex min-h-11 items-center text-base font-semibold text-primary underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              How do we check prices?
+            </Link>
           </section>
         </aside>
       </div>
 
       {related.length > 0 && (
         <section aria-labelledby="related-heading" className="mt-14 border-t border-outline-variant pt-10">
-          <h2 id="related-heading" className="text-xl font-bold text-on-surface">
-            Other {isMedication ? "medications" : "tests and services"}
+          <h2 id="related-heading" className="text-2xl font-bold text-on-surface">
+            Other {isMedication ? "medicines" : "tests and services"}
           </h2>
-          <ul className="mt-4 divide-y divide-outline-variant overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm ring-1 ring-outline-variant/70">
+          <ul className="mt-5 divide-y divide-outline-variant overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm ring-1 ring-outline-variant/70">
             {related.map((other) => (
               <PriceListRow key={other.key} item={other} />
             ))}
