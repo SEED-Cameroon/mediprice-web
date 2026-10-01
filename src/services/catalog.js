@@ -33,26 +33,31 @@ export const slugify = (text = '') =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 
-// ASSUMPTION: field names below follow the backend SRS draft (Mongo `_id`,
-// `prices[]` with a populated `provider`). Adjust here, and only here, if the
-// real API differs.
+// mediprice-api provider types -> the labels shown to people.
+const PROVIDER_TYPES = { pharmacy: 'Pharmacy', lab: 'Laboratory', hospital: 'Hospital' }
+
+// Matches mediprice-api: a price row has `amount`, `trustBadge`, `updatedAt`
+// and `providerId` populated with { _id, name, type, quarter, phone, location }.
+// Sample data uses flat rows ({ name, type, area, price, trust }). Adjust here,
+// and only here, if the API changes.
 function normalisePrice(raw, index) {
-  // A populated `provider` object carries its own id. On a flat row, `id` is
-  // the price row's id, not the provider's, so only use an explicit providerId.
-  const populated = raw.provider && typeof raw.provider === 'object'
-  const provider = populated ? raw.provider : raw
-  const name = provider.name ?? raw.providerName ?? 'Unknown provider'
-  const providerId = populated ? provider._id ?? provider.id : raw.providerId
+  // A populated provider object carries its own id. On a flat sample row,
+  // `id` is the price row's id, not the provider's, so it's never used.
+  const populated = raw.providerId && typeof raw.providerId === 'object' ? raw.providerId : null
+  const provider = populated ?? raw
+  const name = provider.name ?? 'Unknown provider'
 
   return {
     id: raw._id ?? raw.id ?? index,
-    providerId: String(providerId ?? slugify(name)),
+    providerId: String(populated?._id ?? slugify(name)),
     name,
-    type: provider.type ?? raw.type,
-    area: provider.area ?? provider.quarter ?? raw.area,
-    price: Number(raw.price ?? raw.amount),
-    trust: normaliseTrust(raw.trust ?? raw.trustLevel ?? raw.badge),
-    updatedAt: raw.updatedAt ?? raw.lastUpdated ?? raw.checkedAt,
+    type: PROVIDER_TYPES[provider.type] ?? provider.type,
+    area: provider.quarter ?? provider.area,
+    phone: provider.phone,
+    location: provider.location?.lat != null ? provider.location : undefined,
+    price: Number(raw.amount ?? raw.price),
+    trust: normaliseTrust(raw.trustBadge ?? raw.trust),
+    updatedAt: raw.updatedAt,
   }
 }
 
@@ -105,17 +110,24 @@ const notFound = (what) => new ApiError(`We couldn't find that ${what}.`, 404)
 // Public API
 // ---------------------------------------------------------------------------
 
+// The API pages lists (max 100 per page). The catalogue is small, so pages
+// fetch one full page and filter on the client.
+// TODO: follow `pagination.totalPages` once the catalogue grows past 100 items.
+const LIST_LIMIT = 100
+const listQuery = (search) =>
+  new URLSearchParams({ limit: String(LIST_LIMIT), ...(search ? { q: search } : {}) }).toString()
+
 /** GET /api/medications?q= */
 export async function listMedications({ search } = {}) {
   if (USE_SAMPLE_DATA) return sample(sampleItems.medication.filter((item) => matches(item, search)))
-  const res = await apiFetch(`/medications${search ? `?q=${encodeURIComponent(search)}` : ''}`)
+  const res = await apiFetch(`/medications?${listQuery(search)}`)
   return res.data.map((raw) => normaliseItem(raw, 'medication'))
 }
 
 /** GET /api/services?q= */
 export async function listServices({ search } = {}) {
   if (USE_SAMPLE_DATA) return sample(sampleItems.service.filter((item) => matches(item, search)))
-  const res = await apiFetch(`/services${search ? `?q=${encodeURIComponent(search)}` : ''}`)
+  const res = await apiFetch(`/services?${listQuery(search)}`)
   return res.data.map((raw) => normaliseItem(raw, 'service'))
 }
 
@@ -152,12 +164,18 @@ export async function getService(id) {
 
 /**
  * Items to compare side by side. Invalid ids are dropped silently (SRS 4.5).
- * Until GET /api/compare is confirmed (SRS open question 3), this falls back
- * to one detail request per id.
+ * Uses GET /api/compare against the real API; sample mode looks each id up.
  * @param {{ group: "medication" | "service", ids: string[] }} params
  * @returns {Promise<object[]>}
  */
 export async function getComparison({ group, ids }) {
+  if (!USE_SAMPLE_DATA) {
+    // GET /api/compare drops unknown ids itself: one request per comparison.
+    const res = await apiFetch(`/compare?${new URLSearchParams({ itemType: group, ids: ids.join(',') })}`)
+    const byId = new Map(res.data.map((raw) => [String(raw._id), normaliseItem(raw, group)]))
+    return ids.map((id) => byId.get(id)).filter(Boolean)
+  }
+
   const getOne = group === 'medication' ? getMedication : getService
   const results = await Promise.allSettled(ids.map((id) => getOne(id)))
 
@@ -178,6 +196,8 @@ export function providersFrom(items) {
         name: price.name,
         type: price.type,
         area: price.area,
+        phone: price.phone,
+        location: price.location,
         prices: [],
       }
       entry.prices.push({ item, price })

@@ -103,6 +103,10 @@ export const trustRank = {
  * @param {{ name: string, area?: string }} provider
  */
 export function directionsUrl(provider) {
+  // Exact directions when the API has the provider's coordinates.
+  if (provider.location?.lat != null && provider.location?.lng != null) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${provider.location.lat},${provider.location.lng}`;
+  }
   const query = [provider.name, provider.area, "Bamenda, Cameroon"].filter(Boolean).join(", ");
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
