@@ -5,7 +5,7 @@ import Freshness from "../components/Freshness";
 import TrustBadge from "../components/TrustBadge";
 import { MAX_COMPARE, useCompare } from "@/context/CompareContext";
 import useApiFetch from "@/hooks/useApiFetch";
-import { formatFCFA, priceSummary } from "@/lib/format";
+import { formatFCFA, formatFCFAExact, priceSummary } from "@/lib/format";
 import { typicalPrice } from "@/lib/pricing";
 import { getComparison } from "@/services/catalog";
 
@@ -107,14 +107,17 @@ const Compare = () => {
 
   const rows = status === "ready" ? data.map(describe) : [];
   const best = rows.length ? Math.min(...rows.map((row) => row.lowest ?? Infinity)) : null;
+  const anyPrices = rows.some((row) => row.count > 0);
 
   const attributes = [
     {
       label: "Lowest price",
       render: (row) => (
         <div>
-          <p className="tabular text-2xl font-extrabold tracking-tight text-on-surface">{formatFCFA(row.lowest)}</p>
-          {row.lowest === best && rows.length > 1 && (
+          <p className="tabular text-2xl font-extrabold tracking-tight text-on-surface">
+            {row.count > 0 ? formatFCFA(row.lowest) : <span className="text-base font-medium text-on-surface-variant">No Bamenda prices yet</span>}
+          </p>
+          {anyPrices && row.lowest === best && rows.length > 1 && (
             <p className="mt-0.5 inline-flex items-center gap-1.5 text-base font-semibold text-primary">
               <Check className="size-5" aria-hidden="true" />
               Lowest of these
@@ -141,6 +144,24 @@ const Compare = () => {
         ) : (
           <p className="text-base text-on-surface-variant">No prices yet</p>
         ),
+    },
+    {
+      label: "Typical in Cameroon",
+      render: (row) => {
+        const ref = row.item.referencePrices?.[0];
+        return ref ? (
+          <div>
+            <p className="tabular text-base font-semibold text-on-surface">
+              {formatFCFAExact(ref.amount)} <span className="font-normal text-on-surface-variant">{ref.unit}</span>
+            </p>
+            <a href={ref.sourceUrl} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-sm text-secondary underline underline-offset-4">
+              Survey, {ref.year}
+            </a>
+          </div>
+        ) : (
+          <p className="text-base text-on-surface-variant">No survey price</p>
+        );
+      },
     },
     {
       label: "Usual price",

@@ -168,6 +168,11 @@ const ProviderDetail = () => {
           </div>
         )}
 
+        {entries.length === 0 && (
+          <p className="mt-5 rounded-2xl border border-dashed border-outline-variant p-6 text-lg text-on-surface-variant">
+            We haven't collected prices from {provider.name} yet.
+          </p>
+        )}
         <ul className="mt-5 space-y-4">
           {shown.map(({ item, price, lowest, isCheapest }) => (
             <li key={item.key} className="rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70">

@@ -20,6 +20,7 @@ import Freshness from "./Freshness";
 import PriceListRow from "./PriceListRow";
 import PriceSpread from "./PriceSpread";
 import ProviderPriceList from "./ProviderPriceList";
+import ReferencePrices from "./ReferencePrices";
 import TrustBadge from "./TrustBadge";
 
 const kindIcons = {
@@ -208,7 +209,22 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
             </section>
           )}
 
+          {/* No provider prices yet: say so plainly, and show published prices if any */}
+          {!cheapest && (
+            <div className="mt-8 space-y-5">
+              <section className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-lowest p-5 sm:p-6">
+                <h2 className="text-xl font-bold text-on-surface">No Bamenda prices yet</h2>
+                <p className="mt-2 text-base leading-7 text-on-surface-variant">
+                  We haven't collected what pharmacies, labs or hospitals in Bamenda charge for this yet. Ask the
+                  provider for the price before you pay.
+                </p>
+              </section>
+              <ReferencePrices references={item.referencePrices} />
+            </div>
+          )}
+
           {/* Every price */}
+          {count > 0 && (
           <section id="all-prices" aria-labelledby="all-prices-heading" className="mt-12 scroll-mt-24">
             <h2 id="all-prices-heading" className="text-2xl font-bold tracking-tight text-on-surface">
               All prices ({count})
@@ -261,10 +277,12 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
               <ProviderPriceList providers={rows} itemName={item.name} lowest={lowest} />
             </div>
           </section>
+          )}
         </div>
 
         {/* Tips */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          {cheapest && <ReferencePrices references={item.referencePrices} compact />}
           <section className="rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70 sm:p-6">
             <h2 className="text-xl font-bold text-on-surface">Before you go</h2>
             <ul className="mt-4 space-y-4">

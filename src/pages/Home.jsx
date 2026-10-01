@@ -7,7 +7,7 @@ import PriceListRow from "../components/PriceListRow";
 import TrustBadge from "../components/TrustBadge";
 import { trustLevels } from "@/lib/trust";
 import useApiFetch from "@/hooks/useApiFetch";
-import { listAll, providersFrom } from "@/services/catalog";
+import { listAll, listProviders } from "@/services/catalog";
 import images from "../data/images";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { comparePrice, typicalPrice } from "@/lib/pricing";
@@ -16,9 +16,9 @@ import { comparePrice, typicalPrice } from "@/lib/pricing";
 const shortName = (name) => name.replace(/\s+\d[\d/.,]*\s*(mg|ml|g|mcg|iu)?\b.*$/i, "").trim() || name;
 
 const categoryDefs = [
-  { title: "Medicines", kind: "Medication", to: "/medications", noun: "medicines" },
-  { title: "Lab tests", kind: "Lab test", to: "/labs-services?type=Lab+test", noun: "tests" },
-  { title: "Care services", kind: "Care service", to: "/labs-services?type=Care+service", noun: "services" },
+  { title: "Medicines", kind: "Medication", to: "/medications", noun: "medicines", singular: "medicine" },
+  { title: "Lab tests", kind: "Lab test", to: "/labs-services?type=Lab+test", noun: "tests", singular: "test" },
+  { title: "Care services", kind: "Care service", to: "/labs-services?type=Care+service", noun: "services", singular: "service" },
 ];
 
 /** Everything the home page shows, derived from the full item list. */
@@ -37,7 +37,10 @@ function buildHome(catalog) {
 
   return {
     catalog,
-    board: byCoverage.slice(0, 5),
+    // The price board needs provider prices; until there are some, show
+    // items with published survey prices instead.
+    board: byCoverage.filter((item) => item.providers.length > 0).slice(0, 5),
+    referenceBoard: catalog.filter((item) => item.referencePrices?.length > 0).slice(0, 6),
     heroItem,
     heroSummary,
     heroCheapest: heroItem?.providers.find((provider) => provider.price === heroSummary.lowest),
@@ -45,7 +48,7 @@ function buildHome(catalog) {
     exampleItem,
     exampleProvider,
     exampleFair: exampleProvider ? comparePrice(exampleProvider.price, exampleTypical) : null,
-    providers: providersFrom(catalog),
+
     categories: categoryDefs
       .map((category) => {
         const items = catalog.filter((item) => item.kind === category.kind);
@@ -99,10 +102,13 @@ const Home = () => {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const { data, status, error, reload } = useApiFetch(() => listAll(), []);
+  // Every provider, including ones whose prices haven't been collected yet.
+  const { data: providers = [] } = useApiFetch(() => listProviders(), []);
   const view = data && data.length > 0 ? buildHome(data) : null;
   const {
     catalog = [],
     board = [],
+    referenceBoard = [],
     heroItem,
     heroSummary,
     heroCheapest,
@@ -110,7 +116,6 @@ const Home = () => {
     exampleItem,
     exampleProvider,
     exampleFair,
-    providers = [],
     categories = [],
   } = view ?? {};
 
@@ -192,10 +197,10 @@ const Home = () => {
             </form>
 
             {/* The most-priced items from the database, so every chip leads somewhere */}
-            {board.length > 0 && (
+            {(board.length > 0 ? board : referenceBoard).length > 0 && (
             <div className="mt-5 flex flex-wrap items-center gap-2">
               <span className="text-base text-white/85">Popular:</span>
-              {board.map((item) => (
+              {(board.length > 0 ? board : referenceBoard).slice(0, 5).map((item) => (
                 <Link
                   key={item.key}
                   to={item.href}
@@ -259,8 +264,13 @@ const Home = () => {
                   <div>
                     <p className="text-lg font-bold text-on-surface">{category.title}</p>
                     <p className="mt-0.5 text-sm text-on-surface-variant">
-                      {category.count} {category.noun}, from{" "}
-                      <span className="tabular font-semibold text-on-surface">{formatFCFA(category.from)}</span>
+                      {category.count} {category.count === 1 ? category.singular : category.noun}
+                      {Number.isFinite(category.from) && (
+                        <>
+                          , from{" "}
+                          <span className="tabular font-semibold text-on-surface">{formatFCFA(category.from)}</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
@@ -273,6 +283,9 @@ const Home = () => {
         </ul>
       </section>
 
+      {/* Price board (needs provider prices); otherwise typical survey prices */}
+      {board.length > 0 ? (
+        <>
       {/* Price board */}
       <section aria-labelledby="board-heading" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
@@ -359,6 +372,25 @@ const Home = () => {
         </ul>
       </section>
 
+        </>
+      ) : (
+        referenceBoard.length > 0 && (
+          <section aria-labelledby="reference-board-heading" className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
+            <h2 id="reference-board-heading" className="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
+              Typical prices in Cameroon
+            </h2>
+            <p className="mt-1 max-w-[42rem] text-base text-on-surface-variant">
+              From published surveys, while we collect prices from Bamenda providers. Each item links to its source.
+            </p>
+            <ul className="mt-6 divide-y divide-outline-variant overflow-hidden rounded-2xl bg-surface-container-lowest shadow-sm ring-1 ring-outline-variant/70">
+              {referenceBoard.map((item) => (
+                <PriceListRow key={item.key} item={item} />
+              ))}
+            </ul>
+          </section>
+        )
+      )}
+
       {/* How to read a price */}
       <section
         id="how-it-works"
@@ -399,6 +431,7 @@ const Home = () => {
           </div>
 
           {/* Annotated example, built from real data */}
+          {exampleProvider && (
           <figure className="rounded-2xl bg-surface-container-lowest p-5 shadow-md ring-1 ring-outline-variant/60 sm:p-6">
             <figcaption className="text-sm text-on-surface-variant">Example</figcaption>
             <p className="mt-1 text-lg font-bold text-on-surface">{exampleItem.name}</p>
@@ -436,6 +469,7 @@ const Home = () => {
               ))}
             </dl>
           </figure>
+          )}
         </div>
       </section>
 

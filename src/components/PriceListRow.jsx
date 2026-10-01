@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ChevronRight, FileText, MapPin } from "lucide-react";
-import { formatFCFA, priceSummary } from "@/lib/format";
+import { formatFCFA, formatFCFAExact, priceSummary } from "@/lib/format";
 import { typicalPrice } from "@/lib/pricing";
 import TrustBadge from "./TrustBadge";
 
@@ -23,8 +23,8 @@ const PriceListRow = ({ item, showKind = false }) => {
         <div className="flex items-start gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h3 className="text-base font-semibold text-on-surface group-hover:text-primary sm:text-lg">
-                {item.name}
+              <h3 className="break-words text-base font-semibold text-on-surface group-hover:text-primary sm:text-lg">
+                {item.name.replace(/\//g, "/\u200b")}
               </h3>
               {item.requiresPrescription && (
                 <span className="inline-flex items-center gap-1 rounded-sm bg-surface-container px-1.5 py-0.5 text-sm font-medium text-on-surface-variant">
@@ -47,6 +47,14 @@ const PriceListRow = ({ item, showKind = false }) => {
                   {formatFCFA(lowest)}
                 </p>
               </>
+            ) : item.referencePrices?.[0] ? (
+              <>
+                <p className="text-sm text-on-surface-variant">Typical in Cameroon</p>
+                <p className="tabular whitespace-nowrap text-lg font-bold leading-tight text-on-surface sm:text-xl">
+                  {formatFCFAExact(item.referencePrices[0].amount)}
+                </p>
+                <p className="text-sm text-on-surface-variant">{item.referencePrices[0].unit}</p>
+              </>
             ) : (
               <p className="text-sm text-on-surface-variant">No prices yet</p>
             )}
@@ -57,6 +65,13 @@ const PriceListRow = ({ item, showKind = false }) => {
             aria-hidden="true"
           />
         </div>
+
+        {!cheapest && (
+          <p className="mt-3 border-t border-outline-variant/60 pt-3 text-sm text-on-surface-variant">
+            No Bamenda prices yet
+            {item.referencePrices?.[0] && <>. Survey price from {item.referencePrices[0].year}.</>}
+          </p>
+        )}
 
         {cheapest && (
           <div className="mt-3 flex flex-col gap-2 border-t border-outline-variant/60 pt-3 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:pr-9">

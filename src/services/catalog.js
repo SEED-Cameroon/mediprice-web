@@ -77,6 +77,17 @@ function normaliseItem(raw, group) {
     priceFor: raw.priceFor ?? raw.form ?? raw.unit ?? (kind === 'Care service' ? 'One visit' : 'One test'),
     requiresPrescription: Boolean(raw.requiresPrescription ?? raw.prescriptionRequired),
     providers: (raw.prices ?? raw.providers ?? []).map(normalisePrice).filter((p) => !Number.isNaN(p.price)),
+    // Published survey prices for Cameroon: context, not a provider's price.
+    referencePrices: (raw.referencePrices ?? []).map((ref) => ({
+      amount: Number(ref.amount),
+      unit: ref.unit,
+      sector: ref.sector,
+      region: ref.region,
+      year: ref.year,
+      note: ref.note,
+      sourceTitle: ref.sourceTitle,
+      sourceUrl: ref.sourceUrl,
+    })),
   }
 }
 
@@ -217,17 +228,40 @@ export function providersFrom(items) {
   return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name))
 }
 
-/** Every provider we have prices for. */
+/** Provider record from the API -> the shape pages use. */
+const normaliseProvider = (raw) => ({
+  id: String(raw._id),
+  name: raw.name,
+  type: PROVIDER_TYPES[raw.type] ?? raw.type,
+  area: raw.quarter,
+  address: raw.address,
+  city: raw.city,
+  phone: raw.phone,
+  location: raw.location?.lat != null ? raw.location : undefined,
+  prices: [],
+})
+
+/** Every provider, including ones with no prices yet. */
 export async function listProviders() {
-  return providersFrom(await listAll())
+  if (USE_SAMPLE_DATA) return providersFrom(await listAll())
+  const [res, items] = await Promise.all([apiFetch('/providers'), listAll()])
+  const priced = new Map(providersFrom(items).map((provider) => [provider.id, provider]))
+  return res.data
+    .map((raw) => ({ ...normaliseProvider(raw), prices: priced.get(String(raw._id))?.prices ?? [] }))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 /**
- * GET /api/providers/:id (SRS Phase 2). Falls back to building the provider
- * from the item lists until that endpoint exists.
+ * GET /api/providers/:id for the provider's details, plus its prices from the
+ * item lists (which carry every provider's price, needed for "cheapest").
  */
 export async function getProvider(id) {
-  const provider = (await listProviders()).find((entry) => entry.id === String(id))
-  if (!provider) throw notFound('provider')
-  return provider
+  if (USE_SAMPLE_DATA) {
+    const provider = providersFrom(await listAll()).find((entry) => entry.id === String(id))
+    if (!provider) throw notFound('provider')
+    return provider
+  }
+  const [res, items] = await Promise.all([apiFetch(`/providers/${encodeURIComponent(id)}`), listAll()])
+  const priced = providersFrom(items).find((entry) => entry.id === String(id))
+  return { ...normaliseProvider(res.data.provider), prices: priced?.prices ?? [] }
 }

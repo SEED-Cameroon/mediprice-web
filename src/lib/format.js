@@ -12,7 +12,7 @@ const shortDate = new Intl.DateTimeFormat('en-GB', {
  * @returns {string}
  */
 export function formatFCFA(amount) {
-  if (typeof amount !== 'number' || Number.isNaN(amount)) {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) {
     return 'Price unavailable'
   }
 
@@ -59,4 +59,16 @@ export function priceSummary(providers = []) {
     highest: Math.max(...prices),
     count: prices.length,
   }
+}
+
+const fcfaExact = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 })
+
+/**
+ * Formats a published price exactly as reported, keeping decimals,
+ * e.g. 116.83 → "116.83 FCFA" (prices at providers are whole FCFA).
+ * @param {number} amount
+ */
+export function formatFCFAExact(amount) {
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return 'Price unavailable'
+  return `${fcfaExact.format(amount)} FCFA`
 }
