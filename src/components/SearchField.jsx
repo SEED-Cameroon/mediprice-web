@@ -32,7 +32,7 @@ const SearchField = ({ id, label, value, onChange, placeholder, size = "md", aut
         <button
           type="button"
           onClick={() => onChange("")}
-          className="absolute right-1.5 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-md text-outline hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="absolute right-1.5 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-outline hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           aria-label="Clear search"
         >
           <X className="size-5" aria-hidden="true" />

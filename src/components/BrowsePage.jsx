@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { Info } from "lucide-react";
+import { ChevronDown, Info, SlidersHorizontal } from "lucide-react";
 import { priceSummary } from "@/lib/format";
 import FilterGroup from "./FilterGroup";
 import PriceListRow from "./PriceListRow";
@@ -59,6 +59,7 @@ const BrowsePage = ({
   const [searchParams, setSearchParams] = useSearchParams();
   // Other pages can send people here with a message, e.g. Compare with too few items.
   const notice = useLocation().state?.notice;
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const search = searchParams.get("search") ?? "";
   const sort = sorters[searchParams.get("sort")] ? searchParams.get("sort") : "price";
@@ -110,6 +111,7 @@ const BrowsePage = ({
   };
 
   const visible = results.slice(0, page * ITEMS_PER_PAGE);
+  const activeFilterCount = filters.filter((filter) => selected[filter.param] !== "all").length;
   const hasFilters = search || filters.some((filter) => selected[filter.param] !== "all");
 
   return (
@@ -151,16 +153,45 @@ const BrowsePage = ({
       )}
       <div className="mt-8 grid gap-8 lg:grid-cols-[15rem_1fr] lg:gap-10">
         {filters.length > 0 && (
-          <aside aria-label="Filters" className="min-w-0 space-y-5 lg:sticky lg:top-24 lg:self-start">
-            {filters.map((filter) => (
-              <FilterGroup
-                key={filter.param}
-                label={filter.label}
-                options={filterOptions(filter)}
-                value={selected[filter.param]}
-                onChange={(value) => updateParam(filter.param, value)}
+          <aside aria-label="Filters" className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+            {/* On phones, filters fold behind a button so results come first */}
+            <button
+              type="button"
+              onClick={() => setFiltersOpen((open) => !open)}
+              aria-expanded={filtersOpen}
+              aria-controls="filter-panel"
+              className="flex h-12 w-full items-center justify-between gap-3 rounded-xl bg-surface-container-lowest px-4 text-lg font-semibold text-on-surface ring-1 ring-outline-variant hover:ring-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary lg:hidden"
+            >
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="size-5" aria-hidden="true" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="flex size-6 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
+                    {activeFilterCount}
+                    <span className="sr-only"> on</span>
+                  </span>
+                )}
+              </span>
+              <ChevronDown
+                className={`size-5 transition-transform ${filtersOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
               />
-            ))}
+            </button>
+
+            <div
+              id="filter-panel"
+              className={`mt-4 space-y-5 lg:mt-0 lg:block ${filtersOpen ? "block" : "hidden"}`}
+            >
+              {filters.map((filter) => (
+                <FilterGroup
+                  key={filter.param}
+                  label={filter.label}
+                  options={filterOptions(filter)}
+                  value={selected[filter.param]}
+                  onChange={(value) => updateParam(filter.param, value)}
+                />
+              ))}
+            </div>
           </aside>
         )}
 
@@ -200,7 +231,7 @@ const BrowsePage = ({
           ) : (
             <>
               <div className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                <p className="text-sm text-on-surface" aria-live="polite">
+                <p className="text-base leading-[2.75rem] text-on-surface" aria-live="polite">
                   <span className="font-semibold">{results.length}</span>{" "}
                   {results.length === 1 ? noun.replace(/s$/, "") : noun}
                   {search.trim() && <> matching “{search.trim()}”</>}
@@ -208,19 +239,19 @@ const BrowsePage = ({
                     <button
                       type="button"
                       onClick={() => setSearchParams(sort === "price" ? {} : { sort })}
-                      className="ml-3 font-medium text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      className="ml-3 inline-flex min-h-11 items-center font-semibold text-primary underline underline-offset-4 hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                       Clear all
                     </button>
                   )}
                 </p>
 
-                <label className="flex items-center gap-2 text-sm text-on-surface-variant">
+                <label className="flex items-center gap-2 text-base text-on-surface-variant">
                   Sort by
                   <select
                     value={sort}
                     onChange={(event) => updateParam("sort", event.target.value === "price" ? "" : event.target.value)}
-                    className="h-9 rounded-md border border-outline-variant bg-surface-container-lowest px-2 text-sm font-medium text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="h-11 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 text-base font-medium text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     {sortOptions.map((option) => (
                       <option key={option.value} value={option.value}>

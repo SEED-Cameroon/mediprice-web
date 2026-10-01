@@ -175,7 +175,7 @@ const ProviderDetail = () => {
                 <div className="min-w-0">
                   <Link
                     to={item.href}
-                    className="text-lg font-bold leading-snug text-on-surface underline-offset-4 hover:text-primary hover:underline"
+                    className="inline-block py-2.5 text-lg font-bold leading-snug text-on-surface underline-offset-4 hover:text-primary hover:underline"
                   >
                     {item.name.replace(/\//g, "/​")}
                   </Link>

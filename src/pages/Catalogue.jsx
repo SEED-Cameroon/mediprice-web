@@ -13,7 +13,7 @@ const Catalogue = () => {
       title="Medication prices in Bamenda"
       intro="The lowest price we've found for each medicine, and where to get it. Open a medicine to compare every pharmacy."
       searchLabel="Search medicines"
-      searchPlaceholder="Medicine name, e.g. paracetamol or Coartem"
+      searchPlaceholder="Search a medicine"
       items={data ?? []}
       filters={filters}
       noun="medicines"

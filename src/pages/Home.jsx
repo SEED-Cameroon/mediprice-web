@@ -196,7 +196,7 @@ const Home = () => {
                 <Link
                   key={term}
                   to={`/search?search=${encodeURIComponent(term)}`}
-                  className="inline-flex h-10 items-center rounded-lg bg-white/15 px-4 text-base font-medium text-white ring-1 ring-white/30 backdrop-blur-sm transition-colors hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="inline-flex h-11 items-center rounded-lg bg-white/15 px-4 text-base font-medium text-white ring-1 ring-white/30 backdrop-blur-sm transition-colors hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 >
                   {term}
                 </Link>
@@ -282,7 +282,7 @@ const Home = () => {
           </div>
           <Link
             to="/search"
-            className="inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="inline-flex h-11 items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             See all {catalog.length} prices
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -310,7 +310,7 @@ const Home = () => {
                 return (
                   <tr key={item.key} className="hover:bg-surface-container-low">
                     <th scope="row" className="px-5 py-4 font-normal">
-                      <Link to={item.href} className="font-semibold text-on-surface hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <Link to={item.href} className="inline-block py-2.5 font-semibold text-on-surface hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                         {item.name}
                       </Link>
                       <p className="text-sm text-on-surface-variant">{item.priceFor}</p>
@@ -334,7 +334,7 @@ const Home = () => {
                     <td className="px-5 py-4 text-right">
                       <Link
                         to={item.href}
-                        className="inline-flex h-9 items-center rounded-md border border-outline-variant px-3 text-sm font-semibold text-on-surface hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className="inline-flex h-11 items-center rounded-lg border border-outline-variant px-4 text-base font-semibold text-on-surface hover:border-primary hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         aria-label={`Compare ${item.providers.length} prices for ${item.name}`}
                       >
                         Compare {item.providers.length}
@@ -361,7 +361,7 @@ const Home = () => {
         aria-labelledby="read-heading"
         className="scroll-mt-20 border-y border-outline-variant bg-surface-container-low"
       >
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-14">
+        <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-16 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:gap-14 [&>*]:min-w-0">
           <div>
             <h2 id="read-heading" className="text-2xl font-bold tracking-tight text-on-surface sm:text-3xl">
               How to read a price
@@ -417,10 +417,10 @@ const Home = () => {
                 [3, "Verified by", <TrustBadge key="badge" status={exampleProvider.trust} />],
                 [4, "Last checked", <Freshness key="fresh" date={exampleProvider.updatedAt} />],
               ].map(([number, term, value]) => (
-                <div key={number} className="flex items-center justify-between gap-4 py-3">
+                <div key={number} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
                   <dt className="flex items-center gap-2.5 text-sm text-on-surface-variant">
                     <span
-                      className="tabular flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-on-surface text-xs font-bold text-on-surface"
+                      className="tabular flex size-6 shrink-0 items-center justify-center rounded-full border-2 border-on-surface text-sm font-bold text-on-surface"
                       aria-hidden="true"
                     >
                       {number}
@@ -451,7 +451,7 @@ const Home = () => {
         <dl className="mt-8 grid gap-4 md:grid-cols-3">
           {Object.entries(trustLevels).map(([key, level]) => (
             <div key={key} className="rounded-2xl bg-surface-container-lowest p-5 shadow-sm ring-1 ring-outline-variant/70">
-              <dt className="flex items-center justify-between gap-3">
+              <dt className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                 <TrustBadge status={key} />
                 <span className="text-sm text-on-surface-variant">{level.strength}</span>
               </dt>
@@ -462,7 +462,7 @@ const Home = () => {
 
         <Link
           to="/about#badges"
-          className="mt-5 inline-flex h-10 items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="mt-5 inline-flex h-11 items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           How we collect and verify prices
           <ArrowRight className="size-4" aria-hidden="true" />
@@ -533,11 +533,11 @@ const Home = () => {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                className="h-11 flex-1 rounded-lg border border-outline-variant bg-surface-container-lowest px-4 text-base text-on-surface outline-none placeholder:text-outline focus:border-primary focus:ring-3 focus:ring-primary/20"
+                className="h-12 w-full rounded-lg border border-outline-variant bg-surface-container-lowest px-4 sm:flex-1 text-base text-on-surface outline-none placeholder:text-outline focus:border-primary focus:ring-3 focus:ring-primary/20"
               />
               <button
                 type="submit"
-                className="h-11 rounded-lg bg-on-surface px-5 text-sm font-semibold text-surface-container-lowest hover:bg-inverse-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="h-12 rounded-lg bg-on-surface px-6 text-base font-semibold text-surface-container-lowest hover:bg-inverse-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 Subscribe
               </button>

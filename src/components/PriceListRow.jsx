@@ -27,7 +27,7 @@ const PriceListRow = ({ item, showKind = false }) => {
                 {item.name}
               </h3>
               {item.requiresPrescription && (
-                <span className="inline-flex items-center gap-1 rounded-sm bg-surface-container px-1.5 py-0.5 text-xs font-medium text-on-surface-variant">
+                <span className="inline-flex items-center gap-1 rounded-sm bg-surface-container px-1.5 py-0.5 text-sm font-medium text-on-surface-variant">
                   <FileText className="size-3.5" aria-hidden="true" />
                   Prescription needed
                 </span>
@@ -42,7 +42,7 @@ const PriceListRow = ({ item, showKind = false }) => {
           <div className="shrink-0 text-right">
             {count > 0 ? (
               <>
-                <p className="text-xs text-on-surface-variant">{count > 1 ? "Lowest" : "Price"}</p>
+                <p className="text-sm text-on-surface-variant">{count > 1 ? "Lowest" : "Price"}</p>
                 <p className="tabular whitespace-nowrap text-lg font-bold leading-tight text-on-surface sm:text-xl">
                   {formatFCFA(lowest)}
                 </p>

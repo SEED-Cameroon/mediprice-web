@@ -253,7 +253,7 @@ const Compare = () => {
                       <th key={row.item.key} scope="col" className="p-5 font-normal">
                         <Link
                           to={row.item.href}
-                          className="text-lg font-bold leading-snug text-on-surface underline-offset-4 hover:text-primary hover:underline"
+                          className="inline-block py-2.5 text-lg font-bold leading-snug text-on-surface underline-offset-4 hover:text-primary hover:underline"
                         >
                           {row.item.name.replace(/\//g, "/​")}
                         </Link>
@@ -261,7 +261,7 @@ const Compare = () => {
                         <button
                           type="button"
                           onClick={() => removeItem(row.item.id)}
-                          className="mt-2 inline-flex h-10 items-center gap-1.5 rounded-lg text-base font-medium text-on-surface-variant hover:text-error focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          className="mt-2 inline-flex h-11 items-center gap-1.5 rounded-lg text-base font-medium text-on-surface-variant hover:text-error focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           <X className="size-4" aria-hidden="true" />
                           Remove
@@ -297,7 +297,7 @@ const Compare = () => {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <Link to={row.item.href} className="text-xl font-bold leading-snug text-on-surface underline-offset-4 hover:underline">
+                      <Link to={row.item.href} className="inline-block py-2.5 text-xl font-bold leading-snug text-on-surface underline-offset-4 hover:underline">
                         {row.item.name.replace(/\//g, "/​")}
                       </Link>
                       <p className="mt-0.5 text-base text-on-surface-variant">{row.item.kind}</p>

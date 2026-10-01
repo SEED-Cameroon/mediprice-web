@@ -30,7 +30,7 @@ const PriceSpread = ({ providers = [], size = "md", showTypical = true }) => {
         {hasTypical && (
           <div
             aria-hidden="true"
-            className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-xs font-medium text-on-surface"
+            className="absolute top-0 -translate-x-1/2 whitespace-nowrap text-sm font-medium text-on-surface"
             style={{ left: `${Math.min(Math.max(typicalAt, 12), 88)}%` }}
           >
             Typical {formatAmount(typical)}
@@ -69,7 +69,7 @@ const PriceSpread = ({ providers = [], size = "md", showTypical = true }) => {
       {count > 1 && (
         <figcaption
           aria-hidden="true"
-          className="tabular mt-3 flex justify-between text-xs text-on-surface-variant"
+          className="tabular mt-3 flex justify-between text-sm text-on-surface-variant"
         >
           <span>Lowest {formatAmount(lowest)}</span>
           <span>Highest {formatAmount(highest)}</span>

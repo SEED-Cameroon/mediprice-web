@@ -69,6 +69,14 @@ const Layout = () => {
       : link,
   );
 
+  // Escape closes the phone menu.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event) => event.key === "Escape" && setMenuOpen(false);
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
+
   // Close the mobile menu and start each new page at the top.
   useEffect(() => {
     setMenuOpen(false);
@@ -85,17 +93,17 @@ const Layout = () => {
       </a>
 
       <header className="sticky top-0 z-50 bg-primary text-white shadow-md shadow-black/10">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6 lg:gap-8">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4 sm:gap-4 sm:px-6 lg:gap-8">
           <Link
             to="/"
-            className="flex shrink-0 items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+            className="flex min-h-11 min-w-0 shrink items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
             <span className="flex size-9 items-center justify-center rounded-lg bg-white">
               <Logo className="size-6 text-primary" />
             </span>
             <span className="leading-tight">
               <span className="block text-lg font-extrabold tracking-tight">MediPrice</span>
-              <span className="block text-xs font-medium text-white/80">Cameroon healthcare prices</span>
+              <span className="hidden text-sm font-medium text-white/80 min-[420px]:block">Cameroon healthcare prices</span>
             </span>
           </Link>
 
@@ -114,7 +122,7 @@ const Layout = () => {
           {/* A compact Search button instead of a full search box keeps the bar uncluttered */}
           <Link
             to="/search"
-            className="ml-auto flex h-11 shrink-0 items-center gap-2 rounded-lg bg-white/10 px-3 text-base font-semibold text-white ring-1 ring-white/30 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:ml-2"
+            className="ml-auto flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-white/10 px-3 text-base font-semibold text-white ring-1 ring-white/30 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:ml-2"
           >
             <Search className="size-5" aria-hidden="true" />
             <span className="max-sm:sr-only">Search</span>
@@ -125,7 +133,7 @@ const Layout = () => {
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls="mobile-menu"
-            className="flex h-11 items-center gap-2 rounded-lg px-3 text-base font-semibold text-white ring-1 ring-white/40 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
+            className="flex h-11 shrink-0 items-center gap-2 rounded-lg px-3 text-base font-semibold text-white ring-1 ring-white/40 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white lg:hidden"
           >
             {menuOpen ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
             {menuOpen ? "Close" : "Menu"}
@@ -177,7 +185,7 @@ const Layout = () => {
                     <li key={link.label}>
                       <Link
                         to={link.to}
-                        className="inline-flex min-h-8 items-center rounded-sm transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
+                        className="inline-flex min-h-11 items-center rounded-sm transition-colors hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-fixed-dim"
                       >
                         {link.label}
                       </Link>
@@ -188,7 +196,7 @@ const Layout = () => {
             ))}
           </div>
 
-          <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs sm:flex-row sm:justify-between">
+          <div className="mt-10 flex flex-col gap-2 border-t border-white/10 pt-6 text-sm sm:flex-row sm:justify-between">
             <p>© 2026 MediPrice Cameroon, a SEED Cameroon initiative.</p>
             <p>Prices shown are sample data while live listings are connected. Photos from Pexels.</p>
           </div>

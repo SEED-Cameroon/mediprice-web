@@ -113,8 +113,8 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
           </header>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-lg bg-surface-container px-3 py-1.5 text-base text-on-surface">
-              Price is for:&nbsp;<strong className="font-semibold">{item.priceFor}</strong>
+            <span className="inline-block rounded-lg bg-surface-container px-3 py-1.5 text-base text-on-surface">
+              Price is for:{" "}<strong className="font-semibold">{item.priceFor}</strong>
             </span>
             {item.requiresPrescription && (
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-tertiary/10 px-3 py-1.5 text-base font-semibold text-tertiary">

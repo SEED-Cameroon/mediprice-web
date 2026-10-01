@@ -19,7 +19,7 @@ const Search = () => {
       title="Search prices"
       intro="Medicines, lab tests and care services from providers across Bamenda."
       searchLabel="Search medicines, tests and services"
-      searchPlaceholder="What do you need? e.g. amoxicillin or blood count"
+      searchPlaceholder="Search a medicine or test"
       items={data ?? []}
       filters={filters}
       noun="results"

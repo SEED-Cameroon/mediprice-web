@@ -28,12 +28,12 @@ const CompareTray = () => {
           <ul className="mt-1.5 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
             {items.map((item) => (
               <li key={item.key} className="shrink-0">
-                <span className="inline-flex h-9 items-center gap-1 rounded-lg bg-surface-container pl-3 text-sm font-medium text-on-surface">
+                <span className="inline-flex h-11 items-center gap-1 rounded-lg bg-surface-container pl-3 text-base font-medium text-on-surface">
                   <span className="max-w-[12rem] truncate">{item.name}</span>
                   <button
                     type="button"
                     onClick={() => remove(item.key)}
-                    className="flex size-9 items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="flex size-11 items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <X className="size-4" aria-hidden="true" />
                     <span className="sr-only">Remove {item.name}</span>

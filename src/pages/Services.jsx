@@ -16,7 +16,7 @@ export default function Services() {
       title="Lab test and care prices in Bamenda"
       intro="What hospitals, health centres and labs charge for tests, scans and consultations. Open one to compare every provider."
       searchLabel="Search lab tests and services"
-      searchPlaceholder="Test or service, e.g. malaria test or ultrasound"
+      searchPlaceholder="Search a test or service"
       items={data ?? []}
       filters={filters}
       noun="services"
