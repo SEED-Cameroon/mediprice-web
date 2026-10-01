@@ -8,6 +8,7 @@ import useApiFetch from "@/hooks/useApiFetch";
 import { formatFCFA, formatFCFAExact, priceSummary } from "@/lib/format";
 import { typicalPrice } from "@/lib/pricing";
 import { getComparison } from "@/services/catalog";
+import usePageMeta from "@/hooks/usePageMeta";
 
 const groups = {
   medication: { browse: "/medications", plural: "medicines", title: "Compare medicines" },
@@ -54,6 +55,7 @@ const CopyLinkButton = () => {
 };
 
 const Compare = () => {
+  usePageMeta({ title: "Compare prices", noindex: true });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setItems } = useCompare();

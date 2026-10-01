@@ -4,6 +4,7 @@ import { ChevronRight, Menu, Search, X } from "lucide-react";
 import { useCompare } from "@/context/CompareContext";
 import { USE_SAMPLE_DATA } from "@/lib/api";
 import CompareTray from "./CompareTray";
+import Logo from "./Logo";
 
 const navLinks = [
   { label: "Medicines", to: "/medications" },
@@ -31,21 +32,6 @@ const footerLinks = [
     ],
   },
 ];
-
-const Logo = ({ className = "" }) => (
-  <svg
-    className={`shrink-0 ${className}`}
-    fill="none"
-    viewBox="0 0 48 48"
-    xmlns="http://www.w3.org/2000/svg"
-    aria-hidden="true"
-  >
-    <path
-      d="M13.8261 17.4264C16.7203 18.1174 20.2244 18.5217 24 18.5217C27.7756 18.5217 31.2797 18.1174 34.1739 17.4264C36.9144 16.7722 39.9967 15.2331 41.3563 14.1648L24.8486 40.6391C24.4571 41.267 23.5429 41.267 23.1514 40.6391L6.64374 14.1648C8.00331 15.2331 11.0856 16.7722 13.8261 17.4264Z"
-      fill="currentColor"
-    />
-  </svg>
-);
 
 const desktopLinkClass = ({ isActive }) =>
   `relative flex h-16 items-center whitespace-nowrap px-3 text-[0.9375rem] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white after:absolute after:inset-x-3 after:bottom-0 after:h-1 after:rounded-t-full ${
@@ -100,9 +86,7 @@ const Layout = () => {
             to="/"
             className="flex min-h-11 min-w-0 shrink items-center gap-2.5 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
           >
-            <span className="flex size-9 items-center justify-center rounded-lg bg-white">
-              <Logo className="size-6 text-primary" />
-            </span>
+            <Logo tone="inverse" className="size-10" />
             <span className="leading-tight">
               <span className="block text-lg font-extrabold tracking-tight">MediPrice</span>
               <span className="hidden text-sm font-medium text-white/80 min-[420px]:block">Cameroon healthcare prices</span>
@@ -170,7 +154,7 @@ const Layout = () => {
           <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
             <div className="max-w-[24rem]">
               <div className="flex items-center gap-2.5 text-white">
-                <Logo className="size-6 text-primary-fixed-dim" />
+                <Logo className="size-8" />
                 <p className="text-lg font-bold tracking-tight">MediPrice Cameroon</p>
               </div>
               <p className="mt-3 text-sm leading-6">

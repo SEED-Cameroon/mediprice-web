@@ -3,11 +3,13 @@ import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
 import { Button, Field, Notice, TextInput } from "../components/admin/ui";
 import { homeFor, useAuth } from "@/context/AuthContext";
+import usePageMeta from "@/hooks/usePageMeta";
 
 /** Only same-site paths are allowed as a return address (no open redirects). */
 const safeNext = (value) => (value && value.startsWith("/") && !value.startsWith("//") ? value : null);
 
 const SignIn = () => {
+  usePageMeta({ title: "Sign in", noindex: true });
   const { user, status, refresh, login } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

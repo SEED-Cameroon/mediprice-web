@@ -2,6 +2,7 @@ import BrowsePage from '../components/BrowsePage'
 import images from '../data/images'
 import useApiFetch from '@/hooks/useApiFetch'
 import { listServices } from '@/services/catalog'
+import usePageMeta from '@/hooks/usePageMeta'
 
 const filters = [
   { param: 'type', label: 'Type', getValue: (item) => item.kind },
@@ -9,6 +10,11 @@ const filters = [
 ]
 
 export default function Services() {
+  usePageMeta({
+    title: 'Lab test and care prices in Bamenda',
+    description: 'Compare what hospitals, health centres and labs in Bamenda charge for tests, scans and consultations.',
+    canonicalPath: '/labs-services',
+  })
   const { data, status, error, reload } = useApiFetch(() => listServices(), [])
 
   return (

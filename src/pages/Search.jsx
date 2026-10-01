@@ -2,6 +2,7 @@ import BrowsePage from "../components/BrowsePage";
 import images from "../data/images";
 import useApiFetch from "@/hooks/useApiFetch";
 import { listAll } from "@/services/catalog";
+import usePageMeta from "@/hooks/usePageMeta";
 
 const filters = [
   {
@@ -12,6 +13,7 @@ const filters = [
 ];
 
 const Search = () => {
+  usePageMeta({ title: "Search prices", noindex: true });
   const { data, status, error, reload } = useApiFetch(() => listAll(), []);
 
   return (

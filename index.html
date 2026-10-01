@@ -2,21 +2,100 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      %SITE_URL% is replaced at build time (see the seo plugin in vite.config.js):
+      VITE_SITE_URL, else Vercel's production URL, else localhost.
+      These tags are what WhatsApp, Facebook and X read: their link-preview
+      bots don't run JavaScript, so per-page changes made in the app don't reach them.
+    -->
+    <title>MediPrice Cameroon — Compare healthcare prices in Bamenda</title>
+    <meta
+      name="description"
+      content="Compare what pharmacies, labs and hospitals in Bamenda charge for medicines and tests, and see who checked each price."
+    />
+    <link rel="canonical" href="%SITE_URL%/" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Icons -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#006c49" />
+    <meta name="application-name" content="MediPrice" />
+    <meta name="apple-mobile-web-app-title" content="MediPrice" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MediPrice Cameroon" />
+    <meta property="og:locale" content="en_CM" />
+    <meta property="og:title" content="MediPrice Cameroon — Compare healthcare prices in Bamenda" />
+    <meta
+      property="og:description"
+      content="See what pharmacies, labs and hospitals in Bamenda charge for medicines and tests, and who checked each price."
+    />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MediPrice: compare medicine and test prices in Bamenda" />
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MediPrice Cameroon — Compare healthcare prices in Bamenda" />
+    <meta
+      name="twitter:description"
+      content="See what pharmacies, labs and hospitals in Bamenda charge for medicines and tests, and who checked each price."
+    />
+    <meta name="twitter:image" content="%SITE_URL%/og-image.jpg" />
+    <meta name="twitter:image:alt" content="MediPrice: compare medicine and test prices in Bamenda" />
+
+    <!-- Structured data: who we are, and the site's search (Google sitelinks search box) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "%SITE_URL%/#organization",
+            "name": "MediPrice Cameroon",
+            "url": "%SITE_URL%/",
+            "logo": "%SITE_URL%/icons/icon-512.png",
+            "description": "Healthcare price transparency for Bamenda, Cameroon. A SEED Cameroon initiative.",
+            "areaServed": { "@type": "City", "name": "Bamenda" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "%SITE_URL%/#website",
+            "name": "MediPrice Cameroon",
+            "url": "%SITE_URL%/",
+            "inLanguage": "en",
+            "publisher": { "@id": "%SITE_URL%/#organization" },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": { "@type": "EntryPoint", "urlTemplate": "%SITE_URL%/search?search={search_term_string}" },
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ]
+      }
+    </script>
+
+    <!-- Fonts: preconnect first so text renders sooner on slow mobile networks -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <meta
-      name="description"
-      content="Compare what pharmacies, labs and hospitals in Bamenda charge for medication and care, and see who verified each price."
-    />
-    <title>MediPrice Cameroon — Compare healthcare prices in Bamenda</title>
   </head>
   <body>
+    <noscript>
+      MediPrice needs JavaScript to show prices. Please turn it on, or use a browser that supports it.
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -11,6 +11,7 @@ import { listAll, listProviders } from "@/services/catalog";
 import images from "../data/images";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { comparePrice, typicalPrice } from "@/lib/pricing";
+import usePageMeta from "@/hooks/usePageMeta";
 
 /** Short chip label: drops the strength, e.g. "Paracetamol 500mg" -> "Paracetamol". */
 const shortName = (name) => name.replace(/\s+\d[\d/.,]*\s*(mg|ml|g|mcg|iu)?\b.*$/i, "").trim() || name;
@@ -96,6 +97,7 @@ const HomeDataState = ({ status, error, onRetry }) => (
 );
 
 const Home = () => {
+  usePageMeta();
   const navigate = useNavigate();
   const location = useLocation();
   const [query, setQuery] = useState("");

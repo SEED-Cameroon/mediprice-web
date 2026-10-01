@@ -2,6 +2,7 @@ import path from 'node:path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import seoPlugin from './seo.plugin.js'
 
 // https://vite.dev/config/
 // In development and `vite preview`, /api is forwarded to mediprice-api, so the
@@ -15,7 +16,7 @@ const apiProxy = {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), seoPlugin()],
   server: { proxy: apiProxy },
   preview: { proxy: apiProxy },
   resolve: {

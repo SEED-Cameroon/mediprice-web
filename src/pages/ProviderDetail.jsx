@@ -4,6 +4,8 @@ import { ArrowLeft, Building2, CircleCheck, FlaskConical, Hospital, MapPin, Navi
 import Freshness from "../components/Freshness";
 import TrustBadge from "../components/TrustBadge";
 import NotFound from "./NotFound";
+import JsonLd from "../components/JsonLd";
+import usePageMeta, { SITE_URL } from "@/hooks/usePageMeta";
 import useApiFetch from "@/hooks/useApiFetch";
 import { formatFCFA, priceSummary } from "@/lib/format";
 import { directionsUrl } from "@/lib/pricing";
@@ -16,6 +18,25 @@ const typeIcons = {
   "Health centre": Building2,
   Laboratory: FlaskConical,
 };
+
+const schemaTypes = { Pharmacy: "Pharmacy", "Hospital pharmacy": "Pharmacy", Hospital: "Hospital", Laboratory: "MedicalClinic" };
+
+/** schema.org listing for a provider: helps local search ("pharmacy near Nkwen"). */
+const providerSchema = (provider) => ({
+  "@context": "https://schema.org",
+  "@type": schemaTypes[provider.type] ?? "MedicalOrganization",
+  name: provider.name,
+  url: `${SITE_URL}/providers/${provider.id}`,
+  ...(provider.phone ? { telephone: provider.phone } : {}),
+  address: {
+    "@type": "PostalAddress",
+    ...(provider.address ? { streetAddress: provider.address } : {}),
+    addressLocality: provider.city ?? "Bamenda",
+    addressRegion: "North West",
+    addressCountry: "CM",
+  },
+  ...(provider.location ? { geo: { "@type": "GeoCoordinates", latitude: provider.location.lat, longitude: provider.location.lng } } : {}),
+});
 
 const tabs = [
   { value: "all", label: "Everything" },
@@ -31,6 +52,15 @@ const ProviderDetail = () => {
   const { id } = useParams();
   const [tab, setTab] = useState("all");
   const { data: provider, status, error, reload } = useApiFetch(() => getProvider(id), [id]);
+
+  usePageMeta(
+    provider
+      ? {
+          title: `${provider.name} prices`,
+          description: `${provider.name}${provider.area ? `, ${provider.area}` : ""}, ${provider.city ?? "Bamenda"}. See what it charges for medicines and tests, and get directions.`,
+        }
+      : { title: "Provider" },
+  );
 
   if (status === "error" && error.status === 404) {
     return (
@@ -88,6 +118,7 @@ const ProviderDetail = () => {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 pb-24 pt-5 sm:px-6 sm:pt-8">
+      <JsonLd data={providerSchema(provider)} />
       <Link
         to="/medications"
         className="inline-flex h-11 items-center gap-2 rounded-lg text-base font-medium text-on-surface-variant hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"

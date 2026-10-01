@@ -1,9 +1,11 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import usePageMeta from "@/hooks/usePageMeta";
 
 /** Frame for the admin and provider areas: tabs, who's signed in, sign out. */
 const StaffLayout = ({ title, tabs }) => {
+  usePageMeta({ title, noindex: true });
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 

@@ -1,11 +1,15 @@
 import { Link } from "react-router-dom";
+import usePageMeta from "@/hooks/usePageMeta";
 
 const NotFound = ({
   title = "This page doesn't exist",
   message = "The link may be broken, or the page may have moved. Search for a medication instead.",
   linkTo = "/medications",
   linkLabel = "Browse medications",
-}) => (
+}) => {
+  usePageMeta({ title: "Page not found", noindex: true });
+  return (
+
   <div className="mx-auto w-full max-w-5xl px-4 py-20 sm:px-6 sm:py-28">
     <div className="max-w-[36rem]">
       <p className="tabular text-sm font-semibold text-primary">Error 404</p>
@@ -30,5 +34,6 @@ const NotFound = ({
     </div>
   </div>
 );
+};
 
 export default NotFound;

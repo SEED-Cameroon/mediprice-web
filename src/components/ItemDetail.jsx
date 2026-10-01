@@ -11,7 +11,7 @@ import {
   Pill,
   Stethoscope,
 } from "lucide-react";
-import { formatFCFA, priceSummary } from "@/lib/format";
+import { formatFCFA, formatFCFAExact, priceSummary } from "@/lib/format";
 import { daysSince, directionsUrl, trustRank, typicalPrice } from "@/lib/pricing";
 import useApiFetch from "@/hooks/useApiFetch";
 import { listMedications, listServices } from "@/services/catalog";
@@ -21,6 +21,8 @@ import PriceListRow from "./PriceListRow";
 import PriceSpread from "./PriceSpread";
 import ProviderPriceList from "./ProviderPriceList";
 import ReferencePrices from "./ReferencePrices";
+import JsonLd from "./JsonLd";
+import usePageMeta, { SITE_URL } from "@/hooks/usePageMeta";
 import TrustBadge from "./TrustBadge";
 
 const kindIcons = {
@@ -59,6 +61,27 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
   const unverifiedCount = item.providers.filter((p) => p.trust === "Community-reported").length;
   const KindIcon = kindIcons[item.kind] ?? Pill;
 
+  const reference = item.referencePrices?.[0];
+  usePageMeta({
+    title: `${item.name} price in Bamenda`,
+    description: cheapest
+      ? `Cheapest: ${formatFCFA(lowest)} at ${cheapest.name}. Compare ${count} ${count === 1 ? "price" : "prices"} for ${item.name} (${item.priceFor.toLowerCase()}) from providers in Bamenda.`
+      : reference
+        ? `${item.name}: no Bamenda prices yet. Typical price in Cameroon: ${formatFCFAExact(reference.amount)} ${reference.unit} (${reference.year} survey).`
+        : `${item.name}: what it is for, and what providers in Bamenda charge for it.`,
+  });
+
+  const listPath = item.group === "medication" ? "/medications" : "/labs-services";
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+      { "@type": "ListItem", position: 2, name: item.group === "medication" ? "Medicines" : "Tests & services", item: `${SITE_URL}${listPath}` },
+      { "@type": "ListItem", position: 3, name: item.name, item: `${SITE_URL}${item.href}` },
+    ],
+  };
+
   const rows = item.providers
     .filter((provider) => !checkedOnly || provider.trust !== "Community-reported")
     .sort(sorters[sort]);
@@ -84,6 +107,7 @@ const ItemDetail = ({ item, backTo, backLabel }) => {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 pb-16 pt-5 sm:px-6 sm:pt-8">
+      <JsonLd data={breadcrumbs} />
       <Link
         to={backTo}
         className="inline-flex h-11 items-center gap-2 rounded-lg text-base font-medium text-on-surface-variant hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"

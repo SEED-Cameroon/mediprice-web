@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import TrustBadge from "../components/TrustBadge";
 import images from "../data/images";
+import usePageMeta from "@/hooks/usePageMeta";
 
 const sourcingSteps = [
   {
@@ -43,6 +44,10 @@ const trustTiers = [
 ];
 
 const About = () => {
+  usePageMeta({
+    title: "How MediPrice checks prices",
+    description: "Why MediPrice exists, where the prices come from, and what each trust badge means.",
+  });
   const { hash } = useLocation();
 
   useEffect(() => {
